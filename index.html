@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -10,7 +10,7 @@
         /* Định nghĩa font dễ đọc, sử dụng Inter hoặc fallback Sans-serif */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f7f9fc; /* Nền xám rất nhạt */
+            background-color: #f0f4f8; /* Nền xám nhạt hiện đại hơn */
             color: #333;
         }
         /* Tuỳ chỉnh Tailwind để sử dụng font Inter */
@@ -25,14 +25,41 @@
             margin: 0 auto;
             padding: 1rem;
         }
+
+        /* Thêm style cho tiêu đề đẹp hơn */
+        .fancy-header-text {
+            /* Sử dụng gradient và đổ bóng cho tiêu đề chính */
+            background-image: linear-gradient(to right, #4c51bf, #667eea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Cấu trúc chung cho lớp Modal (sử dụng opacity/pointer-events để ẩn/hiện) */
+        .modal-layer {
+            transition: opacity 0.5s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal-layer.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-layer .modal-content {
+            transition: transform 0.5s ease;
+            transform: scale(0.9);
+        }
+        .modal-layer.show .modal-content {
+            transform: scale(1);
+        }
     </style>
 </head>
 <body class="min-h-screen">
 
     <!-- 2. PHẦN ĐẦU TRANG (HEADER) -->
-    <header class="bg-white shadow-sm py-8 mb-6 border-b border-gray-200">
+    <header class="bg-white shadow-lg py-8 mb-8 border-b border-indigo-200">
         <div class="table-container text-center">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight fancy-header-text">
                 DANH SÁCH BÀI KIỂM TRA TRẮC NGHIỆM ONLINE
             </h1>
         </div>
@@ -40,53 +67,49 @@
 
     <!-- 3. PHẦN CHÍNH: BẢNG KIỂM TRA -->
     <main class="table-container">
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
             <table class="w-full text-left border-collapse">
                 <!-- Tiêu đề cột -->
                 <thead>
-                    <tr class="bg-gray-100 text-gray-700 uppercase text-sm leading-normal">
-                        <th class="py-3 px-4 sm:px-6 border-b border-gray-300 w-1/12 text-center">STT</th>
-                        <th class="py-3 px-4 sm:px-6 border-b border-gray-300 w-8/12">Tên bài học / Tên đề</th>
-                        <th class="py-3 px-4 sm:px-6 border-b border-gray-300 w-3/12 text-center">Truy cập</th>
+                    <tr class="bg-indigo-100 text-indigo-700 uppercase text-sm leading-normal font-bold">
+                        <th class="py-4 px-4 sm:px-6 border-b border-indigo-300 w-1/12 text-center">STT</th>
+                        <th class="py-4 px-4 sm:px-6 border-b border-indigo-300 w-8/12">Tên bài học / Tên đề</th>
+                        <th class="py-4 px-4 sm:px-6 border-b border-indigo-300 w-3/12 text-center">Truy cập</th>
                     </tr>
                 </thead>
                 
-                <!-- Dữ liệu bảng (DỄ DÀNG CHỈNH SỬA VÀ THÊM DÒNG MỚI) -->
-                <tbody class="text-gray-700 text-base font-light divide-y divide-gray-200">
+                <!-- Dữ liệu bảng -->
+                <tbody class="text-gray-700 text-base font-light divide-y divide-gray-100">
                     
                     <!-- DÒNG 1: Đề Ôn Cuối Kỳ GDQP -->
-                    <tr class="hover:bg-blue-50/50 transition duration-200 ease-in-out group odd:bg-white even:bg-gray-50">
+                    <tr class="hover:bg-indigo-50 transition duration-200 ease-in-out group odd:bg-white even:bg-gray-50">
                         <td class="py-4 px-4 sm:px-6 whitespace-nowrap text-center text-sm font-medium">1</td>
                         <td class="py-4 px-4 sm:px-6 font-semibold">
                             Đề Ôn Cuối Kỳ GDQP
                         </td>
                         <td class="py-4 px-4 sm:px-6 text-center">
-                            <!-- Nút được đặt màu xanh dương mặc định và luôn dẫn đến link nội bộ -->
                             <button data-quiz-id="1" 
                                     data-internal-link="GDQP.html" 
-                                    class="access-button text-white font-bold py-2 px-4 rounded-lg transition duration-150 shadow-md text-sm w-full min-w-[120px] bg-blue-600 hover:bg-blue-700">
+                                    class="access-button text-white font-bold py-2 px-4 rounded-xl transition duration-150 shadow-md text-sm w-full min-w-[120px] bg-indigo-600 hover:bg-indigo-700 transform hover:scale-105">
                                 Vào làm bài
                             </button>
                         </td>
                     </tr>
                     
                     <!-- DÒNG 2: Đề Cương Cuối Kì Tin 12 -->
-                    <tr class="hover:bg-blue-50/50 transition duration-200 ease-in-out group odd:bg-white even:bg-gray-50">
+                    <tr class="hover:bg-indigo-50 transition duration-200 ease-in-out group odd:bg-white even:bg-gray-50">
                         <td class="py-4 px-4 sm:px-6 whitespace-nowrap text-center text-sm font-medium">2</td>
                         <td class="py-4 px-4 sm:px-6 font-semibold">
                             Đề Cương Cuối Kì Tin 12
                         </td>
                         <td class="py-4 px-4 sm:px-6 text-center">
-                            <!-- Nút được đặt màu xanh dương mặc định và luôn dẫn đến link nội bộ -->
                             <button data-quiz-id="2" 
                                     data-internal-link="TINCK1.html" 
-                                    class="access-button text-white font-bold py-2 px-4 rounded-lg transition duration-150 shadow-md text-sm w-full min-w-[120px] bg-blue-600 hover:bg-blue-700">
+                                    class="access-button text-white font-bold py-2 px-4 rounded-xl transition duration-150 shadow-md text-sm w-full min-w-[120px] bg-indigo-600 hover:bg-indigo-700 transform hover:scale-105">
                                 Vào làm bài
                             </button>
                         </td>
                     </tr>
-
-                    <!-- Thêm dòng mới tại đây. Chỉ cần copy <tr>...</tr> và cập nhật STT, Tên đề, và link (href) -->
                     
                 </tbody>
             </table>
@@ -102,95 +125,177 @@
         </div>
     </footer>
 
-    <!-- MODAL HIỂN THỊ LẦN ĐẦU TRUY CẬP -->
-    <div id="initialModal" class="fixed inset-0 bg-gray-900 bg-opacity-90 z-50 flex items-center justify-center transition-opacity duration-500 opacity-0 pointer-events-none">
-        <div class="bg-white p-10 rounded-2xl shadow-2xl relative max-w-lg w-11/12 text-center transform transition-transform duration-500 scale-95">
-            <!-- Nút Đóng (X) -->
-            <button id="closeModal" class="absolute top-3 right-3 text-gray-500 hover:text-red-600 transition duration-150 p-2 text-2xl font-semibold">
+    <!-- MODAL 1: Hiển thị đầu tiên (State: 'step1_pending') -->
+    <div id="modalContainer1" class="modal-layer fixed inset-0 bg-gray-900 bg-opacity-90 z-50 flex items-center justify-center">
+        <div class="modal-content bg-white p-10 rounded-2xl shadow-2xl relative max-w-lg w-11/12 text-center">
+            <!-- Nút Đóng (X) - Cần có ID riêng để JS phân biệt hành động -->
+            <button id="closeModal1" class="absolute top-3 right-3 text-gray-400 hover:text-red-600 transition duration-150 p-2 text-2xl font-semibold bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center">
                 &times;
             </button>
+            
+            <!-- Nội dung Modal 1 -->
             <h2 class="text-4xl sm:text-5xl font-extrabold text-indigo-700 mb-4 tracking-wider animate-pulse" style="font-family: 'Georgia', serif;">
                 Bài Kiểm Tra Online
             </h2>
             <p class="text-gray-600 text-lg sm:text-xl">
                 Chào mừng bạn đến với trang tổng hợp tài liệu luyện đề.
             </p>
-            <p class="mt-6 text-sm text-gray-500 italic">
-                Vui lòng nhấn 'X' để tiếp tục vào trang.
+            <p class="mt-6 text-base text-indigo-500 font-semibold italic">
             </p>
         </div>
     </div>
 
-    <!-- JavaScript cho Logic truy cập và Modal -->
+    <!-- MODAL 2: Hiển thị ngay sau khi Modal 1 biến mất (State: 'step2_pending') -->
+    <div id="modalContainer2" class="modal-layer fixed inset-0 bg-gray-900 bg-opacity-90 z-50 flex items-center justify-center">
+        <div class="modal-content bg-white p-10 rounded-2xl shadow-2xl relative max-w-lg w-11/12 text-center border-4 border-green-500">
+            <!-- Nút Đóng (X) - Cần có ID riêng để JS phân biệt hành động -->
+            <button id="closeModal2" class="absolute top-3 right-3 text-gray-400 hover:text-red-600 transition duration-150 p-2 text-2xl font-semibold bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center">
+                &times;
+            </button>
+            
+            <!-- Nội dung Modal 2 -->
+            <h2 class="text-4xl sm:text-5xl font-extrabold text-green-700 mb-4 tracking-wider" style="font-family: 'Georgia', serif;">
+                Bạn Đã Sẵn Sàng!
+            </h2>
+            <p class="text-gray-600 text-lg sm:text-xl">
+                Cảm ơn bạn đã hoàn thành bước thông báo.
+            </p>
+            <p class="mt-6 text-base text-green-500 font-semibold italic">
+            </p>
+        </div>
+    </div>
+
+    <!-- JavaScript cho Logic truy cập, Modal và Trạng thái -->
     <script>
-        // Key lưu trữ trạng thái Modal trong Local Storage
-        const MODAL_STORAGE_KEY = 'initial_modal_visited_v2'; 
-        // Link dẫn đến lần đầu bấm nút X
+        // Key lưu trữ trạng thái Modal trong Local Storage. 
+        // States: 'step1_pending', 'step2_pending', 'closed'
+        const SEQUENCE_STATE_KEY = 'initial_modal_sequence_v5'; 
+        // Key lưu trữ thời điểm đóng vĩnh viễn
+        const LAST_CLOSED_TIMESTAMP_KEY = 'modal_closed_timestamp';
+        // 24 giờ tính bằng mili giây
+        const TIMEOUT_24H_MS = 24 * 60 * 60 * 1000; // 86,400,000 ms
+
+        // Link dẫn đến lần đầu bấm nút X (Modal 1)
         const EXTERNAL_LINK = 'https://s.shopee.vn/6KxR3KqMsK';
         
-        const initialModal = document.getElementById('initialModal');
-        const closeModalButton = document.getElementById('closeModal');
+        const modalContainer1 = document.getElementById('modalContainer1');
+        const modalContainer2 = document.getElementById('modalContainer2');
+        const closeModal1 = document.getElementById('closeModal1');
+        const closeModal2 = document.getElementById('closeModal2');
 
         /**
-         * Xử lý sự kiện khi bấm vào nút "Vào làm bài".
-         * Luôn dẫn thẳng đến link nội bộ.
+         * Lấy trạng thái modal hiện tại, có tính đến thời gian 24h.
+         */
+        function getModalState() {
+            let state = localStorage.getItem(SEQUENCE_STATE_KEY) || 'step1_pending';
+            const lastClosed = localStorage.getItem(LAST_CLOSED_TIMESTAMP_KEY);
+            const now = Date.now();
+
+            if (state === 'closed' && lastClosed) {
+                const diff = now - parseInt(lastClosed, 10);
+                
+                if (diff < TIMEOUT_24H_MS) {
+                    // Chưa đủ 24h, giữ nguyên trạng thái 'closed'
+                    console.log("Modal sequence closed. Time remaining:", ((TIMEOUT_24H_MS - diff) / 3600000).toFixed(2), "hours.");
+                } else {
+                    // Đã qua 24h, reset lại state
+                    console.log("24 hours passed. Resetting modal state.");
+                    state = 'step1_pending';
+                    localStorage.removeItem(LAST_CLOSED_TIMESTAMP_KEY);
+                    localStorage.setItem(SEQUENCE_STATE_KEY, 'step1_pending');
+                }
+            }
+            return state;
+        }
+
+        /**
+         * Cập nhật trạng thái modal vào Local Storage.
+         */
+        function updateModalState(newState) {
+            localStorage.setItem(SEQUENCE_STATE_KEY, newState);
+        }
+
+        /**
+         * Xử lý sự kiện khi bấm nút "Vào làm bài" (trong bảng chính).
          */
         function handleQuizAccess(event) {
-            const button = event.currentTarget;
-            const internalLink = button.dataset.internalLink;
+            const internalLink = event.currentTarget.dataset.internalLink;
             window.open(internalLink, '_blank');
         }
 
         /**
-         * Xử lý đóng Modal
+         * Hiển thị modal tương ứng với trạng thái hiện tại.
          */
-        function handleCloseModal() {
-            const isModalVisited = localStorage.getItem(MODAL_STORAGE_KEY) === 'true';
+        function showCurrentModal(state) {
+            // Ẩn tất cả trước
+            modalContainer1.classList.remove('show');
+            modalContainer2.classList.remove('show');
 
-            // Bắt đầu ẩn modal (hiệu ứng mờ dần và co lại)
-            initialModal.style.opacity = '0';
-            initialModal.querySelector('div').style.transform = 'scale(0.95)';
-
-            if (!isModalVisited) {
-                // Lần đầu đóng: Dẫn đến link ngoại, và đánh dấu đã truy cập
-                localStorage.setItem(MODAL_STORAGE_KEY, 'true');
-                // Sử dụng setTimeout ngắn để đảm bảo hiệu ứng ẩn modal bắt đầu trước khi chuyển trang
+            // Hiển thị cái cần thiết
+            if (state === 'step1_pending') {
                 setTimeout(() => {
-                    initialModal.style.pointerEvents = 'none'; // Ngăn chặn tương tác
-                    window.open(EXTERNAL_LINK, '_blank');
-                }, 300); 
-            } else {
-                // Lần sau đóng: chỉ ẩn modal và ngăn chặn tương tác ngay
+                    modalContainer1.classList.add('show');
+                }, 500); 
+            } else if (state === 'step2_pending') {
+                // Modal 2 chỉ hiện khi người dùng đã chuyển hướng và quay lại
                 setTimeout(() => {
-                    initialModal.style.pointerEvents = 'none';
-                }, 300);
+                    modalContainer2.classList.add('show');
+                }, 100); 
             }
+            // State 'closed' thì không làm gì cả
+        }
+
+        /**
+         * Xử lý hành động đóng Modal 1.
+         * Chuyển từ M1 sang M2 (step1_pending -> step2_pending) và REDIRECT.
+         */
+        function handleCloseModal1() {
+            modalContainer1.classList.remove('show');
+            updateModalState('step2_pending');
+            
+            // Redirect sau khi modal biến mất
+            setTimeout(() => {
+                modalContainer1.style.pointerEvents = 'none';
+                window.open(EXTERNAL_LINK, '_blank'); // <--- REDIRECT Ở ĐÂY
+            }, 300);
+        }
+
+        /**
+         * Xử lý hành động đóng Modal 2.
+         * Chuyển từ M2 sang Closed (step2_pending -> closed) và CHỈ TẮT.
+         * Cập nhật TIMESTAMP.
+         */
+        function handleCloseModal2() {
+            modalContainer2.classList.remove('show');
+            updateModalState('closed');
+            localStorage.setItem(LAST_CLOSED_TIMESTAMP_KEY, Date.now().toString()); // Lưu timestamp
+
+            // Chỉ ẩn modal
+            setTimeout(() => {
+                modalContainer2.style.pointerEvents = 'none';
+            }, 300);
         }
 
         /**
          * Khởi tạo trạng thái Modal và gán sự kiện cho các nút.
          */
         function initializePage() {
-            // Gán sự kiện cho các nút truy cập bài kiểm tra
+            // Gán sự kiện cho các nút truy cập bài kiểm tra (bảng chính)
             const accessButtons = document.querySelectorAll('.access-button');
             accessButtons.forEach(button => {
                 button.addEventListener('click', handleQuizAccess);
             });
 
-            // Logic Modal
-            const isModalVisited = localStorage.getItem(MODAL_STORAGE_KEY) === 'true';
+            // Logic Modal: Lấy trạng thái đã được kiểm tra 24h
+            const modalState = getModalState();
             
-            if (!isModalVisited) {
-                // Nếu chưa truy cập, hiển thị modal
-                setTimeout(() => {
-                    initialModal.style.opacity = '1';
-                    initialModal.style.pointerEvents = 'auto'; // Cho phép tương tác
-                    initialModal.querySelector('div').style.transform = 'scale(1)';
-                }, 500); // Đợi 1 chút sau khi load trang
+            if (modalState !== 'closed') {
+                showCurrentModal(modalState);
             }
 
             // Gán sự kiện đóng modal
-            closeModalButton.addEventListener('click', handleCloseModal);
+            closeModal1.addEventListener('click', handleCloseModal1);
+            closeModal2.addEventListener('click', handleCloseModal2);
         }
 
         // Chạy hàm khởi tạo khi DOM đã load

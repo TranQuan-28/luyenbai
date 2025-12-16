@@ -1,0 +1,596 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ĐỀ CƯƠNG CUỐI KÌ 1 - TIN 12</title>
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container {
+            max-width: 1000px;
+        }
+        .question-card {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+        }
+        .answer-option {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .answer-option:hover {
+            background-color: #e5e7eb;
+        }
+        /* Custom radio/checkbox styling for a unified look */
+        .custom-radio {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 50%;
+            border: 2px solid #3b82f6;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+            position: relative;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .custom-radio:checked {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .custom-radio:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background: white;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Result highlighting */
+        .correct-answer {
+            background-color: #d1fae5 !important; /* Green */
+            border-color: #10b981 !important;
+            font-weight: 600;
+        }
+        .incorrect-answer {
+            background-color: #fee2e2 !important; /* Red */
+            border-color: #ef4444 !important;
+        }
+        .user-selected {
+            border: 2px solid #3b82f6 !important;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div id="app" class="container mx-auto">
+        <header class="text-center mb-8 p-4 bg-white rounded-xl shadow-lg">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">ĐỀ CƯƠNG CUỐI KÌ 1 - TIN 12</h1>
+            <p class="text-sm text-gray-500">Năm học 2025 - 2026</p>
+        </header>
+
+        <!-- Control and Timer Panel -->
+        <div id="control-panel" class="sticky top-0 bg-white p-4 mb-6 rounded-xl shadow-lg flex flex-col md:flex-row justify-between items-center z-10">
+            <div class="text-xl font-semibold mb-3 md:mb-0">
+                Thời gian còn lại: <span id="timer" class="text-red-600">--:--</span>
+            </div>
+            <div class="flex space-x-3">
+                <button id="start-btn" onclick="startQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-200">
+                    Bắt đầu làm bài
+                </button>
+                <button id="submit-btn" onclick="submitQuiz()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-200 hidden" disabled>
+                    Nộp bài & Chấm điểm
+                </button>
+                <button id="restart-btn" onclick="resetQuiz()" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-200 hidden">
+                    Làm lại bài
+                </button>
+            </div>
+        </div>
+
+        <!-- Quiz Container -->
+        <div id="quiz-container" class="space-y-6 hidden">
+            <!-- Questions will be injected here -->
+        </div>
+
+        <!-- Result Modal -->
+        <div id="result-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl max-w-lg w-full transform transition-all scale-100">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Kết quả bài làm</h2>
+                <div class="space-y-3 mb-6 text-lg">
+                    <p>Tổng điểm: <span id="final-score" class="font-bold text-blue-600"></span> / 54</p>
+                    <p>Thời gian hoàn thành: <span id="time-spent" class="font-medium text-gray-600"></span></p>
+                </div>
+                <div class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+                    <button onclick="viewReview()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-200">
+                        Xem lại bài làm
+                    </button>
+                    <button onclick="hideModal(); resetQuiz();" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-200">
+                        Làm lại bài
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Initial Welcome/Instructions Screen -->
+        <div id="welcome-screen" class="bg-white p-8 md:p-12 rounded-xl shadow-lg text-center">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-700 mb-4">Chào mừng đến với Bài kiểm tra!</h2>
+            <p class="text-gray-600 mb-6">Đây là bài kiểm tra bao gồm 50 câu trắc nghiệm và 4 câu Đúng/Sai (tổng 54 câu hỏi). Tổng điểm là **54 điểm**.</p>
+            <ul class="list-disc list-inside text-left mx-auto max-w-md space-y-2 text-gray-600">
+                <li>Thời gian làm bài: **60 phút**.</li>
+                <li>Mỗi lần làm bài, đề thi sẽ được **xáo trộn hoàn toàn** ngẫu nhiên.</li>
+                <li>Sau khi nộp bài, bạn có thể xem lại đáp án và giải thích chi tiết theo thứ tự đề vừa làm.</li>
+            </ul>
+            <button onclick="startQuiz()" class="mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 text-xl rounded-lg shadow-lg transition duration-200">
+                Bắt đầu làm bài
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Thời gian làm bài (60 phút = 3600 giây)
+        const QUIZ_DURATION = 3600; 
+
+        let timerInterval;
+        let timeLeft = QUIZ_DURATION;
+        let quizState = 'welcome'; // 'welcome', 'in_progress', 'finished'
+        let userAnswers = {}; // {qId: answerIndex/value}
+        
+        // Mảng lưu trữ thứ tự đề thi đã xáo trộn (MCQ và TF trộn lẫn)
+        let currentQuizData = []; 
+
+        // Hàm xáo trộn mảng (Fisher-Yates shuffle)
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            let newArray = [...array]; // Tạo bản sao để không ảnh hưởng mảng gốc
+            
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [newArray[currentIndex], newArray[randomIndex]] = [
+                    newArray[randomIndex], newArray[currentIndex]];
+            }
+            return newArray;
+        }
+
+
+        // --- Data Quiz (50 MCQ + 4 TF Groups) ---
+        const MCQ_QUESTIONS = [
+            { id: 1, text: "[NB] Trí tuệ nhân tạo (AI) là gì?", options: ["Một công nghệ cho phép máy tính thực hiện các nhiệm vụ mang tính trí tuệ của con người", "Một loại phần cứng được phát triển để xử lý dữ liệu nhanh hơn", "Một phương pháp lưu trữ dữ liệu trong đám mây", "Một ứng dụng chỉ dùng trong lĩnh vực khoa học y tế"], answer: 0 },
+            { id: 2, text: "[NB] Mục tiêu chính của Trí tuệ nhân tạo (AI) là gì?", options: ["Tạo ra các robot giống con người", "Phát triển phần cứng mạnh hơn", "Tái tạo và mô phỏng trí tuệ của con người", "Lưu trữ dữ liệu an toàn hơn"], answer: 2 },
+            { id: 3, text: "[NB] Ứng dụng AI nào dưới đây thường được dùng trong các hệ thống mở khóa điện thoại bằng gương mặt?", options: ["Nhận dạng chữ viết tay", "Chẩn đoán bệnh", "Nhận dạng khuôn mặt", "Điều khiển tự động"], answer: 2 },
+            { id: 4, text: "[NB] Trợ lý ảo như Siri, Alexa, hoặc Google Assistant thường sử dụng AI để thực hiện chức năng nào dưới đây?", options: ["Điều khiển phương tiện tự động", "Nhận dạng tiếng nói và tương tác với người dùng", "Phát hiện bệnh từ hình ảnh y khoa", "Nhận dạng khuôn mặt"], answer: 1 },
+            { id: 5, text: "[NB] AI được sử dụng trong xe tự lái hoặc các phương tiện thông minh thuộc lĩnh vực nào?", options: ["Nhận dạng chữ viết tay", "Điều khiển tự động", "Chẩn đoán bệnh", "Nhận dạng tiếng nói"], answer: 1 },
+            { id: 6, text: "[NB] AI được sử dụng trong lĩnh vực y tế để làm gì?", options: ["Quản lý kho hàng trong chuỗi cung ứng", "Chẩn đoán bệnh qua hình ảnh và hỗ trợ điều trị cá nhân hóa", "Xây dựng hệ thống định vị cho giao thông", "Quản lý điểm số của học sinh"], answer: 1 },
+            { id: 7, text: "[NB] Lĩnh vực nào dưới đây sử dụng AI để dự đoán thời tiết và mô phỏng thiên tai?", options: ["Khoa học môi trường", "Tài chính", "Thương mại điện tử", "Nông nghiệp"], answer: 0 },
+            { id: 8, text: "[NB] Khả năng suy luận của AI được hiểu là:", options: ["Khả năng tính toán nhanh chóng các phép toán phức tạp", "Khả năng đưa ra quyết định hợp lý dựa trên thông tin đầu vào", "Khả năng xử lý và lưu trữ dữ liệu hiệu quả", "Khả năng điều khiển các thiết bị từ xa"], answer: 1 },
+            { id: 9, text: "[NB] Khả năng học của AI cho phép hệ thống:", options: ["Tự động cải thiện hiệu suất mà không cần con người lập trình lại", "Tăng tốc độ xử lý phần cứng", "Phát triển các bộ cảm biến mới", "Tối ưu hóa bộ nhớ lưu trữ"], answer: 0 },
+            { id: 10, text: "[NB] Một trong những cảnh báo phổ biến về sự phát triển của AI trong tương lai là gì?", options: ["AI có thể tự cải thiện và thay thế hoàn toàn con người trong mọi lĩnh vực", "AI sẽ làm tăng tốc độ xử lý của máy tính lên gấp 10 lần", "AI có thể bị lạm dụng để tạo ra các hệ thống nguy hiểm hoặc xâm phạm quyền riêng tư", "AI sẽ không thể thay thế được bất kỳ công việc nào của con người"], answer: 2 },
+            { id: 11, text: "[NB] Một trong những lo ngại lớn về AI là gì?", options: ["AI sẽ làm giảm hiệu suất của các thiết bị điện tử", "AI có thể dẫn đến mất việc làm cho một số ngành nghề", "AI không thể hoạt động hiệu quả trong các hệ thống tự động", "AI không thể học từ dữ liệu thực tế"], answer: 1 },
+            { id: 12, text: "[TH] Khả năng nào dưới đây không phải là một đặc trưng của AI?", options: ["Khả năng tự học từ dữ liệu", "Khả năng ra quyết định dựa trên dữ liệu đầu vào", "Khả năng tự tạo ra các luật và quy định mới mà không cần con người tham gia", "Khả năng phân tích và nhận dạng hình ảnh hoặc âm thanh"], answer: 2 },
+            { id: 13, text: "[TH] Ứng dụng AI trong nhận dạng khuôn mặt có thể giúp làm gì?", options: ["Xác thực người dùng để mở khóa điện thoại hoặc các hệ thống an ninh", "Xử lý các giao dịch ngân hàng nhanh chóng", "Dự đoán các mô hình thời tiết", "Quản lý dữ liệu trong hệ thống máy chủ đám mây"], answer: 0 },
+            { id: 14, text: "[TH] AI đã đóng vai trò quan trọng trong lĩnh vực giao thông bằng cách nào?", options: ["Tự động hóa quy trình sản xuất ô tô", "Cải thiện hệ thống điều khiển giao thông và phát triển xe tự lái", "Tạo ra các phương pháp an toàn hơn trong vận chuyển hàng hóa", "Giảm thiểu ô nhiễm do phương tiện giao thông"], answer: 1 },
+            { id: 15, text: "[TH] Một trong những cảnh báo lớn về sự phát triển của AI là:", options: ["AI sẽ làm tăng sự sáng tạo và giúp con người giải quyết các vấn đề phức tạp", "AI có thể gây ra sự xâm phạm quyền riêng tư và an ninh nếu dữ liệu bị sử dụng sai mục đích", "AI sẽ không thể tác động đến nền kinh tế và xã hội", "AI sẽ thay thế hoàn toàn các hệ thống pháp luật hiện tại"], answer: 1 },
+            { id: 16, text: "[NB] Để thực hiện kết nối có dây giữa các thiết bị trong mạng LAN, ta sử dụng thiết bị mạng nào sau đây?", options: ["Router", "Modem", "Switch", "Access Point"], answer: 2 },
+            { id: 17, text: "[NB] Vai trò chính của giao thức TCP là:", options: ["Định tuyến các gói dữ liệu qua mạng", "Đảm bảo việc truyền dữ liệu theo từng ứng dụng một cách chính xác, tin cậy và hiệu quả", "Thiết lập địa chỉ IP cho các thiết bị trong mạng", "Quản lý quyền truy cập mạng của các thiết bị"], answer: 1 },
+            { id: 18, text: "[NB] Giao tiếp trong không gian mạng không có ưu điểm nào sau đây?", options: ["Thực hiện ở mọi lúc, mọi nơi", "Tiết kiệm thời gian, công sức hoặc chi phí", "Mở rộng kết nối xã hội và khả năng tương tác", "Luôn giúp cải thiện kỉ năng giao tiếp"], answer: 3 },
+            { id: 19, text: "[NB] Giao tiếp trong không gian mạng không có hạn chế nào sau đây?", options: ["Phụ thuộc vào các phương tiện giao tiếp kĩ thuật số", "Có thể gặp rủi ro về bảo mật và quyền riêng tư", "Nghiện internet do thời gian giao lưu trên mạng nhiều", "Thiếu ngôn ngữ hình thể, thiếu tín hiệu cảm xúc"], answer: 0 },
+            { id: 20, text: "[TH] Theo em, nhược điểm nào là lớn nhất trong học trực tuyến so với học tuyền thống?", options: ["Khó khăn trong việc ghi chép bài", "Không linh hoạt về thời gian", "Khó khăn trong việc kiểm soát sự tập trung", "Không tương tác trực tiếp"], answer: 2 },
+            { id: 21, text: "[TH] Một người bạn nhận được tin nhắn của bạn mình và hiểu lầm điều mà bạn muốn nói vì không rõ thái độ của bạn mình khi gửi tin nhắn đó. Giải thích nào sau đây là đúng nhất cho trường hợp này? Tin nhắn đó:", options: ["Không thể hiện đầy đủ nội dung cần truyền tải", "Diễn đạt sai ý nghĩa và nội dung cần truyền tải", "Viết chữ không dấu nên bị hiểu nhầm nội dung", "Không truyền tải được tín hiệu cảm xúc"], answer: 3 },
+            { id: 22, text: "[NB] Kể tên các thành phần của một phần tử HTML.", options: ["Thẻ mở, nội dung, thẻ đóng", "Nội dung, thẻ đóng", "Thẻ mở và thẻ đóng", "Thẻ mở và nội dung"], answer: 0 },
+            { id: 23, text: "[NB] Liệt kê các đặc điểm của thẻ mở trong HTML.", options: ["Thẻ mở có dạng <thẻ>, bắt đầu phần tử", "Thẻ mở có dấu \"/\" ở đầu và kết thúc phần tử", "Thẻ mở không cần phải có thẻ đóng", "Thẻ mở luôn có nội dung bên trong"], answer: 0 },
+            { id: 24, text: "[NB] Xác định đâu là thẻ đóng trong HTML.", options: ["<p>", "</p>", "<div>", "<h1>"], answer: 1 },
+            { id: 25, text: "[NB] Nhận biết các phần tử chính trong cấu trúc cơ bản của một trang web HTML.", options: ["<html>, <head>, <body>", "<title>, <meta>, <footer>", "<div>, <header>, <footer>", "<header>, <section>, <article>"], answer: 0 },
+            { id: 26, text: "[NB] Phần tử HTML nào chứa nội dung hiển thị của trang web?", options: ["<header>", "<body>", "<main>", "<footer>"], answer: 1 },
+            { id: 27, text: "[NB] Thẻ HTML nào thường được sử dụng để tạo đoạn văn bản?", options: ["<div>", "<span>", "<p>", "<section>"], answer: 2 },
+            { id: 28, text: "[NB] Xác định thẻ HTML nào được dùng để tạo một liên kết đến một trang web khác?", options: ["<a>", "<button>", "<link>", "<nav>"], answer: 0 },
+            { id: 29, text: "[NB] Thuộc tính nào được sử dụng để thay đổi màu sắc của phông chữ trong HTML?", options: ["color", "font-family", "font-size", "style"], answer: 3 },
+            { id: 30, text: "[NB] Trong HTML, thẻ nào được sử dụng để chèn hình ảnh vào trang web?", options: ["<img>", "<video>", "<audio>", "<iframe>"], answer: 0 },
+            { id: 31, text: "[NB] Để chèn một tệp video vào trang web, ta sử dụng thẻ nào sau đây:", options: ["<img>", "<audio>", "<video>", "<source>"], answer: 2 },
+            { id: 32, text: "[NB] Để chèn một tệp âm thanh vào trang web, ta sử dụng thẻ nào sau đây:", options: ["<sound>", "<audio>", "<video>", "<music>"], answer: 1 },
+            { id: 33, text: "[NB] Các thẻ HTML cơ bản để tạo ra các phần tử bảng là:", options: ["<table>, <td>, <th>, <tr>", "<table>, <colspan>, <rowspan>, <td>, <th>, <tr>", "<table>, <ul>, <ol>, <li>", "<table>, <colspan>, <rowspan>"], answer: 0 },
+            { id: 34, text: "[NB] Để tạo ra phần tử là hàng của bảng, ta sử dụng thẻ HTML nào sau đây:", options: ["<table>", "<td>", "<th>", "<tr>"], answer: 3 },
+            { id: 35, text: "[NB] Cặp thẻ HTML nào dùng để tạo biểu mẫu?", options: ["<lable></lable>", "<form></form>", "<input></input>", "<file></file>"], answer: 1 },
+            { id: 36, text: "[NB] Dữ liệu nhập vào có dạng: . Vậy kiểu dữ liệu input cần dùng là?", options: ["radio", "password", "text", "file"], answer: 2 },
+            { id: 37, text: "[NB] Phần tử nào của biểu mẫu cho phép người dùng chọn một trong các lựa chọn trong danh sách thả xuống?", options: ["input", "lable", "select", "textarea"], answer: 2 },
+            { id: 38, text: "[TH] Thẻ nào sau đây dùng để chỉ định tiêu đề của trang web trong phần <head>?", options: ["<title>", "<header>", "<meta>", "<h1>"], answer: 0 },
+            { id: 39, text: "[TH] Thẻ <html> trong một trang HTML có vai trò gì?", options: ["Xác định phần đầu của trang web", "Bao bọc toàn bộ nội dung của trang web, bao gồm phần <head> và <body>", "Định dạng văn bản hiển thị trên trang web", "Thêm hình ảnh vào trang web"], answer: 1 },
+            { id: 40, text: "[TH] Kết quả của thẻ <ul> trong HTML sẽ là gì?", options: ["Tạo danh sách không có thứ tự", "Tạo danh sách có thứ tự", "Tạo danh sách các liên kết", "Tạo bảng"], answer: 0 },
+            { id: 41, text: "[TH] Thẻ HTML nào sau đây được sử dụng để chèn một tệp hình ảnh vào trang web?", options: ["<img>", "<picture>", "<video>", "<audio>"], answer: 0 },
+            { id: 42, text: "[TH] Thẻ <video> trong HTML được sử dụng để làm gì?", options: ["Nhúng một tệp video vào trang web", "Tạo một liên kết đến video trên YouTube", "Tạo một video nền cho trang web", "Tạo danh sách các video liên quan"], answer: 0 },
+            { id: 43, text: "[TH] Khi muốn nhúng một tệp video vào trang web và tự động phát khi tải trang, bạn cần sử dụng thuộc tính nào trong thẻ <video>?", options: ["autoplay", "controls", "muted", "loop"], answer: 0 },
+            { id: 44, text: "[TH] Thuộc tính controls trong thẻ <audio> và <video> có tác dụng gì?", options: ["Cho phép người dùng tải xuống tệp âm thanh hoặc video", "Hiển thị các điều khiển phát (play, pause, volume) cho người dùng", "Tự động phát tệp âm thanh hoặc video khi trang được tải", "Đảm bảo chất lượng âm thanh và video cao nhất"], answer: 1 },
+            { id: 45, text: "[TH] Để tạo một hàng trong bảng HTML, bạn sử dụng thẻ nào?", options: ["<tr>", "<td>", "<th>", "<table>"], answer: 0 },
+            { id: 46, text: "[TH] Thẻ <td> trong bảng HTML dùng để làm gì?", options: ["Định nghĩa một ô trong một hàng của bảng", "Định nghĩa tiêu đề của bảng", "Định nghĩa một cột trong bảng", "Định nghĩa một hàng trong bảng"], answer: 0 },
+            { id: 47, text: "[TH] Thẻ <th> trong bảng HTML có tác dụng gì?", options: ["Định nghĩa một ô trong một hàng của bảng", "Định nghĩa một tiêu đề cho cột hoặc hàng trong bảng", "Định nghĩa một cột trong bảng", "Định nghĩa một hàng trong bảng"], answer: 1 },
+            { id: 48, text: "[TH] Thẻ <input> trong HTML được sử dụng để làm gì trong biểu mẫu?", options: ["Định nghĩa một nút bấm", "Tạo một ô nhập liệu để người dùng nhập thông tin", "Định nghĩa một lựa chọn trong danh sách", "Hiển thị thông báo lỗi"], answer: 1 },
+            { id: 49, text: "[TH] Thẻ <label> trong HTML được sử dụng để làm gì trong biểu mẫu?", options: ["Định nghĩa tiêu đề cho biểu mẫu", "Gắn nhãn mô tả cho các ô nhập liệu", "Hiển thị thông báo lỗi", "Xác định nhóm các ô nhập liệu"], answer: 1 },
+            { id: 50, text: "[TH] Thẻ <textarea> trong HTML được sử dụng để làm gì trong biểu mẫu?", options: ["Tạo một ô nhập liệu cho dữ liệu ngắn", "Cho phép người dùng nhập nhiều dòng văn bản", "Tạo một danh sách lựa chọn", "Định nghĩa một nút gửi dữ liệu"], answer: 1 },
+        ];
+
+        const TF_QUESTIONS = [
+            { 
+                id: 'TF1', 
+                text: "Lựa chọn nhận định đúng/sai về việc sử dụng các chức năng mạng của hệ điều hành để chia sẻ tài nguyên:", 
+                items: [
+                    { subId: 'TF1A', subText: "[NB] Chức năng chia sẻ tài nguyên của hệ điều hành giúp các máy tính trong mạng nội bộ có thể sử dụng chung các tài nguyên đã được chia sẽ.", correct: true, explanation: "Đúng. Đây là vai trò cơ bản của chức năng chia sẻ tài nguyên mạng." },
+                    { subId: 'TF1B', subText: "[NB] Tệp, thư mục, máy in và tất cả các tài nguyên phần cứng khác đều là các tài nguyên có thể được chia sẽ trên mạng", correct: false, explanation: "Sai. Không phải tất cả tài nguyên phần cứng đều chia sẻ được (ví dụ: RAM, CPU, ổ cứng không được format để chia sẻ)." },
+                    { subId: 'TF1C', subText: "[TH] Để chia sẻ tệp, người dùng chọn tệp $\\to$ nháy chuột phải chọn Properties $\\to$ Chọn Sharing là đã có thể chia sẽ được tài nguyên cho các máy trên cùng mạng", correct: false, explanation: "Sai. Cần thêm bước cấu hình quyền truy cập và chia sẻ cụ thể trong mục Sharing." },
+                    { subId: 'TF1D', subText: "[VD] Các máy tính khi đã kết nối vào cùng mạng với máy in thì đều có thể dùng chung máy in", correct: false, explanation: "Sai. Các máy tính cần cài đặt driver tương ứng và máy in cần được cấu hình chia sẻ trong hệ điều hành." },
+                ]
+            },
+            { 
+                id: 'TF2', 
+                text: "Trong dự án thiết kế trang web giới thiệu về trường THPT Chế Lan Viên, cần thiết kế các mục: Giới thiệu, Tin tức-Sự kiện, Lịch công tác…Các bạn trong nhóm thực hiện đã ra một vài nhận định như sau:", 
+                items: [
+                    { subId: 'TF2A', subText: "[NB] Sử dụng thẻ <h1> sử dụng để định dạng các tiêu đề chung cho cả trang web", correct: true, explanation: "Đúng. Thẻ <h1> dùng cho tiêu đề quan trọng nhất của trang." },
+                    { subId: 'TF2B', subText: "[NB] Sử dụng thẻ <p> được sử dụng để định dạng đoạn văn bản", correct: true, explanation: "Đúng. Thẻ <p> là thẻ chuẩn để tạo đoạn văn bản." },
+                    { subId: 'TF2C', subText: "[TH] Muốn nội dung tiêu đề các phần: giới thiệu, tin tức-sự kiện, lịch công tác…chữ màu đỏ, cần thêm thuộc tính khi định dạng là <p style=\"color:red\"> Nội dung trong các phần</p>", correct: false, explanation: "Sai. Nên dùng thẻ tiêu đề (h2, h3) thay vì <p> cho các mục chính. Ngoài ra, thuộc tính style cần nằm trong thẻ mở (ví dụ: <h2 style=\"color:red\">)." },
+                    { subId: 'TF2D', subText: "Tạo các bài viết tóm tắt trên trang chủ và thêm các liên kết đến các trang chi tiết tương ứng (mỗi trang chi tiết là nội dung từng mục: Giới thiệu, tin tức-sự kiện…)", correct: true, explanation: "Đúng. Đây là cách tổ chức nội dung web phổ biến và hiệu quả." },
+                ]
+            },
+            { 
+                id: 'TF3', 
+                text: "Một nhóm học sinh lớp 12B4 có đam mê về du lịch, cùng nhau tạo một trang web để lưu lại các kỷ niệm về những nơi đã đi qua và giới thiệu cho mọi người những hình anh đẹp của địa phương. Khi bắt tay thiết kế trang Web, các bạn đã sử dụng các thẻ HTML để chèn tệp tin đa phương tiện và đưa ra cá nhận định sau:", 
+                items: [
+                    { subId: 'TF3A', subText: "[NB] Thẻ <img> trong HTML được sử dụng để chèn hình ảnh vào trang web", correct: true, explanation: "Đúng. Thẻ <img> được dùng để nhúng hình ảnh." },
+                    { subId: 'TF3B', subText: "[NB] Thuộc tính src của thẻ <audio> dùng để xác định đường dẫn tới tệp âm thanh cần phát", correct: true, explanation: "Đúng. Thuộc tính src (source) chỉ định đường dẫn của tệp." },
+                    { subId: 'TF3C', subText: "[TH] Thẻ <video> trong HTML hỗ trợ phát video và cho phép người dùng tương tác với các tùy chọn như tạm dừng hoặc tua video", correct: true, explanation: "Đúng. Với thuộc tính controls, người dùng có thể tương tác với video." },
+                    { subId: 'TF3D', subText: "[VD] Khi chèn video bằng thẻ <video>, bạn bắt buộc phải sử dụng thuộc tính controls để video có thể phát được trên trình duyệt", correct: false, explanation: "Sai. Video vẫn có thể phát tự động (autoplay) hoặc được điều khiển bằng JavaScript mà không cần thuộc tính controls." },
+                ]
+            },
+            { 
+                id: 'TF4', 
+                text: "Trong trang web tuyển sinh của một trường đại học có thực hiện một số biểu mẫu để nhập dữ liệu. Hãy xác định các phát biểu sau đây là Đúng hay Sai về việc sử dụng thẻ HTML để tạo mẫu biểu (form):", 
+                items: [
+                    { subId: 'TF4A', subText: "[NB] Thẻ <button> có thể được sử dụng để tạo nút gửi dữ liệu trong form", correct: true, explanation: "Đúng. Thẻ <button type=\"submit\"> hoặc <input type=\"submit\"> đều được dùng để gửi dữ liệu." },
+                    { subId: 'TF4B', subText: "[NB] Thẻ <label> được dùng để tạo nhãn cho các trường nhập liệu trong form, giúp tăng khả năng truy cập và tương tác", correct: true, explanation: "Đúng. Thẻ <label> liên kết với <input> để tăng tính khả dụng." },
+                    { subId: 'TF4C', subText: "[TH] Trong một form, thuộc tính type=\"email\" của thẻ <input> đảm bảo người dùng chỉ có thể nhập địa chỉ email hợp lệ", correct: false, explanation: "Sai. Thuộc tính type=\"email\" chỉ kiểm tra định dạng cơ bản (có @ và .) nhưng không đảm bảo email đó thực sự tồn tại hoặc hợp lệ." },
+                    { subId: 'TF4D', subText: "[VD] Đoạn mã sau sẽ tạo một vùng trống với số hàng, số cột xác định để nhập thông tin: HTML <textarea id=\"diachi\" name=\"diachi\" rows=\"5\" cols=\"20\"></textarea>", correct: true, explanation: "Đúng. Thẻ <textarea> với rows=5 và cols=20 tạo ra vùng nhập liệu đa dòng." },
+                ]
+            },
+        ];
+
+        // --- Core Functions ---
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            const paddedMinutes = String(minutes).padStart(2, '0');
+            const paddedSeconds = String(remainingSeconds).padStart(2, '0');
+            return `${paddedMinutes}:${paddedSeconds}`;
+        }
+
+        function updateTimerDisplay() {
+            const timerElement = document.getElementById('timer');
+            if (timeLeft < 0) {
+                timeLeft = 0;
+            }
+            timerElement.textContent = formatTime(timeLeft);
+
+            if (timeLeft <= 300) { // 5 phút cuối
+                timerElement.classList.remove('text-red-600');
+                timerElement.classList.add('text-red-800', 'font-extrabold');
+            }
+
+            if (timeLeft <= 0 && quizState === 'in_progress') {
+                clearInterval(timerInterval);
+                submitQuiz(true); // Tự động nộp bài khi hết giờ
+            } else if (quizState === 'in_progress') {
+                timeLeft--;
+            }
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timeLeft = QUIZ_DURATION;
+            updateTimerDisplay();
+            timerInterval = setInterval(updateTimerDisplay, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
+        // Hàm helper để escape HTML entities for display
+        const escapeHTML = (str) => {
+            return str.replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;')
+                      .replace(/'/g, '&#39;');
+        };
+
+        // Helper để tạo HTML cho câu hỏi trắc nghiệm (MCQ)
+        function renderMCQ(q, questionNumber) {
+            const qId = `mcq_${q.id}`;
+            const answeredValue = userAnswers[qId];
+
+            let optionsHtml = q.options.map((option, optIndex) => {
+                const isChecked = answeredValue == optIndex;
+                const optionId = `${qId}_${optIndex}`;
+                
+                // Thêm class cho chế độ review
+                let optionClass = 'answer-option p-3 rounded-lg flex items-center mb-2 transition duration-150';
+                let reviewText = '';
+                
+                if (quizState === 'finished') {
+                    const isCorrect = q.answer === optIndex;
+                    if (isCorrect) {
+                        optionClass += ' correct-answer';
+                        reviewText = ' - (ĐÁP ÁN ĐÚNG)';
+                    }
+                    if (isChecked && !isCorrect) {
+                        optionClass += ' incorrect-answer';
+                        reviewText = ' - (BẠN CHỌN SAI)';
+                    } else if (isChecked) {
+                        optionClass += ' user-selected';
+                    } 
+                }
+
+                return `
+                    <label for="${optionId}" class="${optionClass}">
+                        <input 
+                            type="radio" 
+                            id="${optionId}" 
+                            name="${qId}" 
+                            value="${optIndex}" 
+                            class="custom-radio"
+                            onchange="recordAnswer('${qId}', this.value)"
+                            ${isChecked ? 'checked' : ''}
+                            ${quizState === 'finished' ? 'disabled' : ''}
+                        >
+                        <span class="font-medium text-gray-700 w-full">${String.fromCharCode(65 + optIndex)}. ${escapeHTML(option)} ${reviewText}</span>
+                    </label>
+                `;
+            }).join('');
+
+            return `
+                <div class="question-card bg-white p-5 md:p-6 rounded-xl border border-gray-200" id="q_${qId}">
+                    <p class="text-sm font-semibold text-blue-600 mb-1">Câu ${questionNumber} (Trắc nghiệm - 1 điểm)</p>
+                    <p class="text-lg font-bold text-gray-800 mb-4">${escapeHTML(q.text)}</p>
+                    <div class="options space-y-2">
+                        ${optionsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Helper để tạo HTML cho câu hỏi Đúng/Sai (TF)
+        function renderTF(q, questionNumber) {
+            const qIdGroup = q.id;
+
+            let subItemsHtml = q.items.map((item, subIndex) => {
+                const qId = item.subId;
+                const answeredValue = userAnswers[qId];
+                const radioName = qId;
+
+                let optionsHtml = ['Đúng', 'Sai'].map((label, optIndex) => {
+                    const isTrue = optIndex === 0;
+                    const value = isTrue ? 'True' : 'False';
+                    const isChecked = answeredValue === value;
+                    const optionId = `${qId}_${value}`;
+                    
+                    // Thêm class cho chế độ review
+                    let optionClass = 'answer-option inline-flex items-center p-3 rounded-lg mr-4 transition duration-150';
+                    let reviewText = '';
+
+                    if (quizState === 'finished') {
+                        const isCorrect = (item.correct && isTrue) || (!item.correct && !isTrue);
+                        
+                        if (isCorrect) {
+                            if (isChecked) optionClass += ' correct-answer user-selected';
+                            else optionClass += ' correct-answer';
+                            reviewText = ' - (ĐÁP ÁN ĐÚNG)';
+                        } else if (isChecked) {
+                            optionClass += ' incorrect-answer user-selected';
+                            reviewText = ' - (BẠN CHỌN SAI)';
+                        }
+                    }
+
+                    return `
+                        <label for="${optionId}" class="${optionClass}">
+                            <input 
+                                type="radio" 
+                                id="${optionId}" 
+                                name="${radioName}" 
+                                value="${value}" 
+                                class="custom-radio"
+                                onchange="recordAnswer('${qId}', this.value)"
+                                ${isChecked ? 'checked' : ''}
+                                ${quizState === 'finished' ? 'disabled' : ''}
+                            >
+                            <span class="font-medium text-gray-700">${label}</span>
+                        </label>
+                    `;
+                }).join('');
+
+                let resultExplanation = '';
+                if (quizState === 'finished') {
+                    resultExplanation = `
+                        <p class="mt-2 text-sm p-3 rounded-lg bg-gray-100 text-gray-700 border-l-4 border-blue-400">
+                            <span class="font-bold">Giải thích:</span> ${escapeHTML(item.explanation)}
+                        </p>
+                    `;
+                }
+                
+                return `
+                    <div class="mb-4 p-4 border border-gray-100 rounded-lg">
+                        <p class="text-base font-medium text-gray-800 mb-3">(${qId.slice(-1)}) ${escapeHTML(item.subText)}</p>
+                        <div class="flex items-center">
+                            ${optionsHtml}
+                        </div>
+                        ${resultExplanation}
+                    </div>
+                `;
+            }).join('');
+
+            // Giả định nhóm TF này có tổng 1 điểm, nếu tất cả 4 câu con đều đúng.
+            let groupScoreInfo = quizState === 'finished' ? ' (1 điểm - Chỉ tính điểm nếu tất cả 4 câu con đều đúng)' : ' (1 điểm)';
+
+            return `
+                <div class="question-card bg-white p-5 md:p-6 rounded-xl border border-gray-200" id="q_${qIdGroup}">
+                    <p class="text-sm font-semibold text-blue-600 mb-1">Câu ${questionNumber} (Đúng/Sai - ${groupScoreInfo})</p>
+                    <p class="text-lg font-bold text-gray-800 mb-4">**NHÓM CÂU HỎI**: ${escapeHTML(q.text)}</p>
+                    <div class="options space-y-2">
+                        ${subItemsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+
+        function renderQuestions() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            
+            if (currentQuizData.length === 0) {
+                 container.innerHTML = `<p class="text-center text-lg text-red-500">Lỗi: Dữ liệu bài kiểm tra chưa được tải. Vui lòng bấm "Bắt đầu làm bài".</p>`;
+                 return;
+            }
+            
+            let questionCounter = 0;
+
+            // Render tất cả các mục theo thứ tự đã xáo trộn
+            currentQuizData.forEach((q) => {
+                questionCounter++;
+                if (q.type === 'mcq') {
+                    container.innerHTML += renderMCQ(q, questionCounter);
+                } else if (q.type === 'tf_group') {
+                    container.innerHTML += renderTF(q, questionCounter);
+                }
+            });
+
+            // Cuộn lên đầu trang sau khi render
+            window.scrollTo(0, 0);
+        }
+
+        function recordAnswer(qId, value) {
+            userAnswers[qId] = value;
+            document.getElementById('submit-btn').disabled = false; // Kích hoạt nút nộp bài
+        }
+
+        function startQuiz() {
+            quizState = 'in_progress';
+            userAnswers = {};
+            timeLeft = QUIZ_DURATION;
+            currentQuizData = []; // Reset dữ liệu đề
+
+            // 1. Gán loại câu hỏi (type) vào data
+            const taggedMCQ = MCQ_QUESTIONS.map(q => ({...q, type: 'mcq'}));
+            const taggedTF = TF_QUESTIONS.map(q => ({...q, type: 'tf_group'}));
+
+            // 2. Trộn lẫn và kết hợp tất cả vào một mảng duy nhất (toàn bộ đề thi)
+            currentQuizData = shuffleArray([...taggedMCQ, ...taggedTF]);
+
+            // Hiển thị giao diện bài làm
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.getElementById('start-btn').classList.add('hidden');
+            document.getElementById('submit-btn').classList.remove('hidden');
+            document.getElementById('restart-btn').classList.add('hidden');
+            document.getElementById('result-modal').classList.add('hidden');
+
+            renderQuestions(); // Render đề thi đã xáo trộn
+            startTimer();
+        }
+
+        function submitQuiz(isTimeout = false) {
+            if (quizState === 'finished') return; // Tránh nộp bài nhiều lần
+
+            stopTimer();
+            quizState = 'finished';
+
+            let score = 0;
+            const totalQuestions = 54; // 50 MCQs + 4 TF Groups
+
+            // Chấm điểm bằng cách lặp qua mảng đề thi đã xáo trộn (currentQuizData)
+            currentQuizData.forEach(q => {
+                
+                if (q.type === 'mcq') {
+                    const qId = `mcq_${q.id}`;
+                    const userAnswer = parseInt(userAnswers[qId]);
+                    if (userAnswer === q.answer) {
+                        score++; // 1 điểm cho mỗi câu MCQ đúng
+                    }
+                } else if (q.type === 'tf_group') {
+                    // Chấm điểm nhóm Đúng/Sai: 1 điểm cho nhóm, chỉ khi TẤT CẢ 4 câu con đều đúng
+                    let isGroupCorrect = true;
+                    q.items.forEach(item => {
+                        const userAnswer = userAnswers[item.subId];
+                        const correctAnswer = item.correct ? 'True' : 'False';
+                        if (userAnswer !== correctAnswer) {
+                            isGroupCorrect = false;
+                        }
+                    });
+                    if (isGroupCorrect) {
+                        score++; // 1 điểm cho nhóm TF đúng
+                    }
+                }
+            });
+
+            // Hiển thị kết quả trong Modal
+            const timeTaken = QUIZ_DURATION - timeLeft;
+            const timeDisplay = isTimeout ? 'Hết giờ (Tự động nộp bài)' : formatTime(timeTaken);
+
+            document.getElementById('final-score').textContent = `${score} / ${totalQuestions}`;
+            document.getElementById('time-spent').textContent = timeDisplay;
+            
+            // Cập nhật giao diện sau khi chấm điểm và hiển thị Modal
+            renderQuestions(); // Render lại để hiện đáp án đúng/sai theo thứ tự đã xáo trộn
+            document.getElementById('submit-btn').classList.add('hidden');
+            document.getElementById('restart-btn').classList.remove('hidden');
+            showModal();
+        }
+        
+        function showModal() {
+            document.getElementById('result-modal').classList.remove('hidden');
+        }
+
+        function hideModal() {
+            document.getElementById('result-modal').classList.add('hidden');
+        }
+
+        function viewReview() {
+            hideModal();
+            // Cuộn lên đầu phần câu hỏi
+            document.getElementById('quiz-container').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetQuiz() {
+            // Đặt lại trạng thái ban đầu
+            quizState = 'welcome';
+            userAnswers = {};
+            timeLeft = QUIZ_DURATION;
+            currentQuizData = []; // Đảm bảo reset cả mảng đề thi đã xáo trộn
+            stopTimer();
+
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('welcome-screen').classList.remove('hidden');
+            document.getElementById('start-btn').classList.remove('hidden');
+            document.getElementById('submit-btn').classList.add('hidden');
+            document.getElementById('restart-btn').classList.add('hidden');
+            document.getElementById('timer').textContent = formatTime(QUIZ_DURATION);
+
+            // Xóa nội dung quiz
+            document.getElementById('quiz-container').innerHTML = '';
+        }
+        
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('timer').textContent = formatTime(QUIZ_DURATION);
+            resetQuiz();
+        });
+
+    </script>
+</body>
+</html>

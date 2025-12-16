@@ -1,0 +1,201 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Sách Bài Kiểm Tra Online</title>
+    <!-- Tải Tailwind CSS để tạo giao diện responsive, gọn gàng -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Định nghĩa font dễ đọc, sử dụng Inter hoặc fallback Sans-serif */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fc; /* Nền xám rất nhạt */
+            color: #333;
+        }
+        /* Tuỳ chỉnh Tailwind để sử dụng font Inter */
+        @layer base {
+          html {
+            font-family: 'Inter', sans-serif;
+          }
+        }
+        /* Đảm bảo bảng có chiều rộng tối đa và căn giữa */
+        .table-container {
+            max-width: 960px; /* Giới hạn chiều rộng cho máy tính */
+            margin: 0 auto;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- 2. PHẦN ĐẦU TRANG (HEADER) -->
+    <header class="bg-white shadow-sm py-8 mb-6 border-b border-gray-200">
+        <div class="table-container text-center">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">
+                DANH SÁCH BÀI KIỂM TRA TRẮC NGHIỆM ONLINE
+            </h1>
+        </div>
+    </header>
+
+    <!-- 3. PHẦN CHÍNH: BẢNG KIỂM TRA -->
+    <main class="table-container">
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <!-- Tiêu đề cột -->
+                <thead>
+                    <tr class="bg-gray-100 text-gray-700 uppercase text-sm leading-normal">
+                        <th class="py-3 px-4 sm:px-6 border-b border-gray-300 w-1/12 text-center">STT</th>
+                        <th class="py-3 px-4 sm:px-6 border-b border-gray-300 w-8/12">Tên bài học / Tên đề</th>
+                        <th class="py-3 px-4 sm:px-6 border-b border-gray-300 w-3/12 text-center">Truy cập</th>
+                    </tr>
+                </thead>
+                
+                <!-- Dữ liệu bảng (DỄ DÀNG CHỈNH SỬA VÀ THÊM DÒNG MỚI) -->
+                <tbody class="text-gray-700 text-base font-light divide-y divide-gray-200">
+                    
+                    <!-- DÒNG 1: Đề Ôn Cuối Kỳ GDQP -->
+                    <tr class="hover:bg-blue-50/50 transition duration-200 ease-in-out group odd:bg-white even:bg-gray-50">
+                        <td class="py-4 px-4 sm:px-6 whitespace-nowrap text-center text-sm font-medium">1</td>
+                        <td class="py-4 px-4 sm:px-6 font-semibold">
+                            Đề Ôn Cuối Kỳ GDQP
+                        </td>
+                        <td class="py-4 px-4 sm:px-6 text-center">
+                            <!-- Nút được đặt màu xanh dương mặc định và luôn dẫn đến link nội bộ -->
+                            <button data-quiz-id="1" 
+                                    data-internal-link="GDQP.html" 
+                                    class="access-button text-white font-bold py-2 px-4 rounded-lg transition duration-150 shadow-md text-sm w-full min-w-[120px] bg-blue-600 hover:bg-blue-700">
+                                Vào làm bài
+                            </button>
+                        </td>
+                    </tr>
+                    
+                    <!-- DÒNG 2: Đề Cương Cuối Kì Tin 12 -->
+                    <tr class="hover:bg-blue-50/50 transition duration-200 ease-in-out group odd:bg-white even:bg-gray-50">
+                        <td class="py-4 px-4 sm:px-6 whitespace-nowrap text-center text-sm font-medium">2</td>
+                        <td class="py-4 px-4 sm:px-6 font-semibold">
+                            Đề Cương Cuối Kì Tin 12
+                        </td>
+                        <td class="py-4 px-4 sm:px-6 text-center">
+                            <!-- Nút được đặt màu xanh dương mặc định và luôn dẫn đến link nội bộ -->
+                            <button data-quiz-id="2" 
+                                    data-internal-link="TINCK1.html" 
+                                    class="access-button text-white font-bold py-2 px-4 rounded-lg transition duration-150 shadow-md text-sm w-full min-w-[120px] bg-blue-600 hover:bg-blue-700">
+                                Vào làm bài
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Thêm dòng mới tại đây. Chỉ cần copy <tr>...</tr> và cập nhật STT, Tên đề, và link (href) -->
+                    
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- 6. PHẦN CUỐI TRANG (FOOTER) -->
+    <footer class="mt-10 py-4 border-t border-gray-200">
+        <div class="table-container text-center">
+            <p class="text-xs text-gray-500">
+                Website phục vụ học tập và luyện đề trắc nghiệm
+            </p>
+        </div>
+    </footer>
+
+    <!-- MODAL HIỂN THỊ LẦN ĐẦU TRUY CẬP -->
+    <div id="initialModal" class="fixed inset-0 bg-gray-900 bg-opacity-90 z-50 flex items-center justify-center transition-opacity duration-500 opacity-0 pointer-events-none">
+        <div class="bg-white p-10 rounded-2xl shadow-2xl relative max-w-lg w-11/12 text-center transform transition-transform duration-500 scale-95">
+            <!-- Nút Đóng (X) -->
+            <button id="closeModal" class="absolute top-3 right-3 text-gray-500 hover:text-red-600 transition duration-150 p-2 text-2xl font-semibold">
+                &times;
+            </button>
+            <h2 class="text-4xl sm:text-5xl font-extrabold text-indigo-700 mb-4 tracking-wider animate-pulse" style="font-family: 'Georgia', serif;">
+                Bài Kiểm Tra Online
+            </h2>
+            <p class="text-gray-600 text-lg sm:text-xl">
+                Chào mừng bạn đến với trang tổng hợp tài liệu luyện đề.
+            </p>
+            <p class="mt-6 text-sm text-gray-500 italic">
+                Vui lòng nhấn 'X' để tiếp tục vào trang.
+            </p>
+        </div>
+    </div>
+
+    <!-- JavaScript cho Logic truy cập và Modal -->
+    <script>
+        // Key lưu trữ trạng thái Modal trong Local Storage
+        const MODAL_STORAGE_KEY = 'initial_modal_visited_v2'; 
+        // Link dẫn đến lần đầu bấm nút X
+        const EXTERNAL_LINK = 'https://s.shopee.vn/6KxR3KqMsK';
+        
+        const initialModal = document.getElementById('initialModal');
+        const closeModalButton = document.getElementById('closeModal');
+
+        /**
+         * Xử lý sự kiện khi bấm vào nút "Vào làm bài".
+         * Luôn dẫn thẳng đến link nội bộ.
+         */
+        function handleQuizAccess(event) {
+            const button = event.currentTarget;
+            const internalLink = button.dataset.internalLink;
+            window.open(internalLink, '_blank');
+        }
+
+        /**
+         * Xử lý đóng Modal
+         */
+        function handleCloseModal() {
+            const isModalVisited = localStorage.getItem(MODAL_STORAGE_KEY) === 'true';
+
+            // Bắt đầu ẩn modal (hiệu ứng mờ dần và co lại)
+            initialModal.style.opacity = '0';
+            initialModal.querySelector('div').style.transform = 'scale(0.95)';
+
+            if (!isModalVisited) {
+                // Lần đầu đóng: Dẫn đến link ngoại, và đánh dấu đã truy cập
+                localStorage.setItem(MODAL_STORAGE_KEY, 'true');
+                // Sử dụng setTimeout ngắn để đảm bảo hiệu ứng ẩn modal bắt đầu trước khi chuyển trang
+                setTimeout(() => {
+                    initialModal.style.pointerEvents = 'none'; // Ngăn chặn tương tác
+                    window.open(EXTERNAL_LINK, '_blank');
+                }, 300); 
+            } else {
+                // Lần sau đóng: chỉ ẩn modal và ngăn chặn tương tác ngay
+                setTimeout(() => {
+                    initialModal.style.pointerEvents = 'none';
+                }, 300);
+            }
+        }
+
+        /**
+         * Khởi tạo trạng thái Modal và gán sự kiện cho các nút.
+         */
+        function initializePage() {
+            // Gán sự kiện cho các nút truy cập bài kiểm tra
+            const accessButtons = document.querySelectorAll('.access-button');
+            accessButtons.forEach(button => {
+                button.addEventListener('click', handleQuizAccess);
+            });
+
+            // Logic Modal
+            const isModalVisited = localStorage.getItem(MODAL_STORAGE_KEY) === 'true';
+            
+            if (!isModalVisited) {
+                // Nếu chưa truy cập, hiển thị modal
+                setTimeout(() => {
+                    initialModal.style.opacity = '1';
+                    initialModal.style.pointerEvents = 'auto'; // Cho phép tương tác
+                    initialModal.querySelector('div').style.transform = 'scale(1)';
+                }, 500); // Đợi 1 chút sau khi load trang
+            }
+
+            // Gán sự kiện đóng modal
+            closeModalButton.addEventListener('click', handleCloseModal);
+        }
+
+        // Chạy hàm khởi tạo khi DOM đã load
+        document.addEventListener('DOMContentLoaded', initializePage);
+
+    </script>
+</body>
+</html>

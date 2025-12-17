@@ -110,6 +110,21 @@
                             </button>
                         </td>
                     </tr>
+
+                    <!-- DÒNG 3: Đề Cương Cuối Kỳ 1 Công Nghệ (MỚI) -->
+                    <tr class="hover:bg-indigo-50 transition duration-200 ease-in-out group odd:bg-white even:bg-gray-50">
+                        <td class="py-4 px-4 sm:px-6 whitespace-nowrap text-center text-sm font-medium">3</td>
+                        <td class="py-4 px-4 sm:px-6 font-semibold">
+                            Đề Cương Cuối Kỳ 1 Công Nghệ
+                        </td>
+                        <td class="py-4 px-4 sm:px-6 text-center">
+                            <button data-quiz-id="3" 
+                                    data-internal-link="CN-CK1.html" 
+                                    class="access-button text-white font-bold py-2 px-4 rounded-xl transition duration-150 shadow-md text-sm w-full min-w-[120px] bg-indigo-600 hover:bg-indigo-700 transform hover:scale-105">
+                                Vào làm bài
+                            </button>
+                        </td>
+                    </tr>
                     
                 </tbody>
             </table>
@@ -158,7 +173,6 @@
                 Bạn Đã Sẵn Sàng!
             </h2>
             <p class="text-gray-600 text-lg sm:text-xl">
-                Cảm ơn bạn đã hoàn thành bước thông báo.
             </p>
             <p class="mt-6 text-base text-green-500 font-semibold italic">
             </p>
@@ -174,9 +188,8 @@
         const LAST_CLOSED_TIMESTAMP_KEY = 'modal_closed_timestamp';
         // 24 giờ tính bằng mili giây
         const TIMEOUT_24H_MS = 24 * 60 * 60 * 1000; // 86,400,000 ms
-
-        // Link dẫn đến lần đầu bấm nút X (Modal 1)
-        const EXTERNAL_LINK = 'https://s.shopee.vn/6KxR3KqMsK';
+        
+        // ** Link đã được xóa bỏ theo yêu cầu **
         
         const modalContainer1 = document.getElementById('modalContainer1');
         const modalContainer2 = document.getElementById('modalContainer2');
@@ -247,16 +260,16 @@
 
         /**
          * Xử lý hành động đóng Modal 1.
-         * Chuyển từ M1 sang M2 (step1_pending -> step2_pending) và REDIRECT.
+         * Chuyển từ M1 sang M2 (step1_pending -> step2_pending) và KHÔNG REDIRECT.
          */
         function handleCloseModal1() {
             modalContainer1.classList.remove('show');
             updateModalState('step2_pending');
             
-            // Redirect sau khi modal biến mất
+            // Chỉ ẩn modal 1, sau đó hiển thị modal 2
             setTimeout(() => {
                 modalContainer1.style.pointerEvents = 'none';
-                window.open(EXTERNAL_LINK, '_blank'); // <--- REDIRECT Ở ĐÂY
+                showCurrentModal('step2_pending'); // Hiển thị Modal 2 ngay
             }, 300);
         }
 

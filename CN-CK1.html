@@ -1,0 +1,538 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Kiểm Tra Cuối Kì Công Nghệ 12</title>
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Cấu hình Font và Tailwind -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        .container {
+            max-width: 900px;
+        }
+        /* Custom scrollbar for better look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .question-card {
+            border-left: 4px solid #3b82f6;
+        }
+        /* Highlight styles for review mode */
+        .correct-answer {
+            background-color: #d1fae5; /* Green for correct */
+            border-color: #10b981;
+        }
+        .incorrect-answer {
+            background-color: #fee2e2; /* Red for incorrect */
+            border-color: #ef4444;
+        }
+        .user-selected {
+            background-color: #bfdbfe; /* Blue for user selection */
+            border-color: #3b82f6;
+        }
+        .tf-correct {
+            font-weight: bold;
+            color: #10b981;
+        }
+        .tf-incorrect-user-choice {
+            background-color: #fecaca;
+            color: #ef4444;
+            border-radius: 4px;
+            padding: 2px 4px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="container mx-auto bg-white p-6 md:p-10 rounded-xl shadow-2xl">
+        <header class="mb-8 border-b pb-4">
+            <h1 class="text-3xl font-bold text-center text-blue-700">ĐỀ CƯƠNG ÔN TẬP CUỐI KÌ 1 - CÔNG NGHỆ 12</h1>
+            <p class="text-center text-gray-500 mt-1">NĂM HỌC 2025-2026 | Tổng điểm: 10 | Thời gian: 45 phút</p>
+            <div id="timer" class="mt-4 text-center text-2xl font-mono p-2 rounded-lg bg-red-100 text-red-600 shadow-inner">
+                Thời gian: 45:00
+            </div>
+        </header>
+
+        <!-- Quiz Container -->
+        <div id="quiz-container">
+            <!-- Questions will be injected here -->
+        </div>
+
+        <!-- Control Buttons -->
+        <div id="controls" class="mt-8 flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
+            <button id="submit-btn" onclick="submitQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 transform hover:scale-105">
+                Nộp Bài & Chấm Điểm
+            </button>
+            <button id="review-btn" onclick="reviewQuiz()" class="hidden bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 transform hover:scale-105">
+                Xem Lại Bài
+            </button>
+            <button id="retake-btn" onclick="retakeQuiz()" class="hidden bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 transform hover:scale-105">
+                Làm Lại Bài
+            </button>
+        </div>
+
+        <!-- Result Section -->
+        <div id="result-container" class="mt-8 p-6 bg-blue-50 rounded-lg shadow-inner hidden">
+            <h2 class="text-2xl font-bold text-blue-700 mb-4">KẾT QUẢ</h2>
+            <p class="text-xl">Tổng điểm của bạn: <span id="score" class="font-extrabold text-red-600"></span> / 10</p>
+            <p class="text-lg mt-2">Thời gian hoàn thành: <span id="time-taken" class="font-semibold text-gray-700"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Dữ liệu câu hỏi và đáp án chuẩn
+        const quizData = [
+            // PHẦN I. TRẮC NGHIỆM NHIỀU LỰA CHỌN (37 câu)
+            { type: 'mcq', id: 1, text: 'Sử dụng tiết kiệm điện năng không mang lại lợi ích nào dưới đây?', options: ['Góp phần làm giảm ô nhiễm môi trường', 'Góp phần phát triển sản xuất', 'Góp phần làm giảm bớt các sự cố về điện', 'Góp phần chữa các bệnh hiểm nghèo'], correct: 3 }, 
+            { type: 'mcq', id: 2, text: 'Để đảm bảo an toàn điện, dây dẫn và cáp điện cần:', options: ['Tính toán lựa chọn dây dẫn và cáp điện có thông số điện áp lớn hơn điện áp của hệ thống', 'Bố trí dây dẫn và cáp điện ở vị trí kín, khó quan sát', 'Để trần đầu nối dây dẫn và cáp điện với các thiết bị', 'Tiết diện lõi dây phải phù hợp với công suất tiêu thụ của thiết bị'], correct: 3 }, 
+            { type: 'mcq', id: 3, text: 'Cách xử trí nào dưới đây là đúng khi cấp cứu người bị điện giật?', options: ['Ngắt cầu dao điện, dùng vật dụng khô để gạt dây điện ra', 'Kéo nạn nhân ra khỏi chỗ điện giật khi chưa ngắt điện', 'Dùng gậy kim loại gạt dây điện ra khỏi người bị giật', 'Dùng tay trần kéo trực tiếp nạn nhân ra khỏi chỗ điện giật'], correct: 0 }, 
+            { type: 'mcq', id: 4, text: 'Hiện nay thường sử dụng mấy loại aptomat để bảo vệ mạch điện khi có sự cố?', options: ['3 loại', '4 loại', '2 loại', '5 loại'], correct: 2 }, 
+            { type: 'mcq', id: 5, text: 'Để sử dụng và tiết kiệm điện năng:', options: ['Giảm bớt tiêu thụ điện năng trong giờ cao điểm, không sử dụng lãng phí điện năng, sử dụng đồ dùng điện hiệu suất cao để tiết kiệm điện năng', 'Giảm bớt tiêu thụ điện năng trong giờ cao điểm', 'Sử dụng đồ dùng điện hiệu suất cao để tiết kiệm điện năng', 'Không sử dụng lãng phí điện năng'], correct: 0 }, 
+            { type: 'mcq', id: 6, text: 'Cần sử dụng loại công tắc nào nếu muốn điều khiển bóng đèn từ hai vị trí khác nhau? (Mô tả: Mạch điện cần điều khiển một bóng đèn duy nhất nhưng có hai điểm điều khiển tách biệt)', options: ['Công tắc 2 cực', 'Công tắc 4 cực', 'Công tắc 5 cực', 'Công tắc 3 cực'], correct: 3 }, 
+            { type: 'mcq', id: 7, text: 'Bước thứ 2 khi thực hiện lắp mạch điện là:', options: ['Lắp công tắc vào bảng điện', 'Xác định vị trí nguồn điện; đánh dấu vị trí lắp đặt công tắc và đèn', 'Chuẩn bị đầy đủ vật tư, thiết bị điện và các công cụ hỗ trợ cần thiết', 'Nối dây điện kết nối các thiết bị trong mạch điện theo sơ đồ'], correct: 1 }, 
+            { type: 'mcq', id: 8, text: 'Khi 2 công tắc 2 cực ở vị trí như sơ đồ sau thì: (Mô tả: Hai công tắc 2 cực đều ở vị trí đóng - ON/CLOSED)', options: ['Mạch điện kín, bóng đèn sáng', 'Mạch điện hở, bóng đèn sáng', 'Mạch điện kín, bóng đèn lóe sáng rồi tắt', 'Mạch điện hở, bóng đèn sáng'], correct: 0 }, 
+            { type: 'mcq', id: 9, text: 'Ngoài chức năng đóng, cắt và bảo vệ quá tải, ngắn mạch, aptomat còn có thêm chức năng gì?', options: ['Phát tín hiệu báo động khi có dấu hiệu mất an toàn điện', 'Sửa chữa thiết bị khi quá tải, ngắn mạch', 'Bảo vệ chống giật điện cho người sử dụng', 'Điều chỉnh cường độ dòng điện khi mạch quá tải'], correct: 2 }, 
+            { type: 'mcq', id: 10, text: 'Các thiết bị đóng – cắt và bảo vệ không được lắp đặt ở:', options: ['Vị trí sát chân tường', 'Trong các tủ điện tổng, tủ điện nhánh', 'Các vị trí dễ thao tác', 'Các vị trí khô ráo'], correct: 0 }, 
+            { type: 'mcq', id: 11, text: 'Dòng điện ngắn mạch là:', options: ['Giá trị dòng điện ngắn mạch lớn nhất mà aptomat có thể cắt trong một giây mà không bị phá hủy', 'Giá trị dòng điện ngắn mạch nhỏ nhất mà aptomat có thể cắt được trong một phút mà không bị phá hủy', 'Giá trị dòng điện ngắn mạch lớn nhất mà aptomat có thể cắt trong một phút mà không bị phá hủy', 'Giá trị dòng điện ngắn mạch nhỏ nhất mà aptomat có thể cắt được trong một giây mà không bị phá hủy'], correct: 0 }, 
+            { type: 'mcq', id: 12, text: 'Kí hiệu dưới đây có tên gọi là gì? (Kí hiệu mô phỏng: Một đường ngang có 3 điểm nối, và một lưỡi dao có thể chuyển đổi để kết nối với 2 trong 3 điểm)', options: ['Công tơ điện', 'Cầu dao ba cực', 'Công tắc ba cực', 'Cầu chì'], correct: 2 }, 
+            { type: 'mcq', id: 13, text: 'Kĩ thuật điện tử được ứng dụng trong ngành nào dưới đây?', options: ['Kĩ thuật cơ khí', 'Kĩ thuật hàng hải', 'Kĩ thuật máy tính', 'Kĩ thuật xây dựng'], correct: 2 }, 
+            { type: 'mcq', id: 14, text: 'Quan sát hình sau, cho biết tên của thiết bị điện trong gia đình? (Mô tả hình: Một hộp nhựa có nhiều ổ cắm, nối với một dây điện dài và phích cắm)', options: ['Công tắc điện', 'Dây dẫn mạch điện', 'Ổ cắm điện kéo dài', 'Công tơ điện'], correct: 2 }, 
+            { type: 'mcq', id: 15, text: 'Bước đầu tiên khi thực hiện lắp mạch điện là:', options: ['Chuẩn bị đầy đủ vật tư, thiết bị điện và các công cụ hỗ trợ cần thiết', 'Lắp công tắc vào bảng điện', 'Xác định vị trí nguồn điện; đánh dấu vị trí lắp đặt công tắc và đèn', 'Nối dây điện kết nối các thiết bị trong mạch điện theo sơ đồ'], correct: 0 }, 
+            { type: 'mcq', id: 16, text: 'Nhiệm vụ của thiết bị đóng – cắt nguồn:', options: ['Bảo vệ chống quá tải và đóng – cắt nguồn điện từ công tơ cấp cho hệ thống điện và các mạch nhánh', 'Đóng – cắt nguồn điện từ tủ điện nhánh cấp cho tải thường là các đèn chiếu sáng, bình nóng lạnh,...', 'Bảo vệ quá tải và đóng cắt nguồn điện mạch nhánh cấp cho hệ thống chiếu sáng, điều hòa nhiệt độ, ổ cắm điện', 'Bảo vệ chống quá tải và đóng hoặc ngắt nguồn điện từ lưới hạ áp cấp cho hệ thống điện qua thiết bị đo lường điện'], correct: 3 }, 
+            { type: 'mcq', id: 17, text: 'Lắp mạch điện cần thực hiện thông qua mấy bước?', options: ['3 bước', '4 bước', '6 bước', '5 bước'], correct: 3 }, 
+            { type: 'mcq', id: 18, text: 'Chức năng của ổ cắm cố định là:', options: ['Đóng – cắt điện bằng tay', 'Kết nối nguồn điện với các thiết bị tiêu thụ điện', 'Đo lường điện năng tiêu thụ của mạng điện', 'Đóng – cắt điện và tự động cắt điện để bảo vệ quá tải, ngắn mạch cho mạch điện'], correct: 1 }, 
+            { type: 'mcq', id: 19, text: 'Khi nối mạch điện vào nguồn điện cần lưu ý điều gì?', options: ['Lắp đèn vào đui đèn và treo đèn vào vị trí đã xác định', 'Đèn và công tắc lắp đặt đúng vị trí so với sơ đồ lắp đặt', 'Tuân thủ hướng dẫn an toàn điện', 'Lắp công tắc vào chính giữa bảng điện'], correct: 2 }, 
+            { type: 'mcq', id: 20, text: 'Một điều hòa có dòng điện chạy qua dây dẫn là 13A. Nếu dây dẫn lõi bằng đồng có mật độ dòng là $6 A/mm^2$, tiết diện của dây là:', options: ['2,1 mm²', '2,2 mm²', '2,5 mm²', '2,3 mm²'], correct: 1 }, // Tính toán: S = I/J = 13/6 ≈ 2.17 mm². Chọn 2.2 mm²
+            { type: 'mcq', id: 21, text: 'Giá trị điện áp định mức của ổ cắm điện thường có giá trị như thế nào so với điện áp định mức của thiết bị tiêu thụ điện?', options: ['Lớn hơn điện áp định mức của thiết bị tiêu thụ điện', 'Lớn hơn hoặc bằng điện áp định mức của thiết bị tiêu thụ điện', 'Nhỏ hơn điện áp định mức của thiết bị tiêu thụ điện', 'Bằng điện áp định mức của thiết bị tiêu thụ điện'], correct: 1 }, 
+            { type: 'mcq', id: 22, text: 'Thiết bị lấy điện bao gồm:', options: ['Ổ cắm điện, công tắc', 'Phích cắm điện, cầu chì', 'Ổ cắm điện, phích cắm điện', 'Phích cắm điện, công tắc'], correct: 2 }, 
+            { type: 'mcq', id: 23, text: 'Thiết bị đóng – cắt nguồn và công tơ điện được đặt ở đâu?', options: ['Đặt trong các phòng hoặc tầng nhà', 'Đặt trong tủ điện ngoài trời', 'Đặt trong nhà', 'Đặt ngầm trong tường'], correct: 1 }, 
+            { type: 'mcq', id: 24, text: 'Trong các tủ điện nhánh có chứa thiết bị nào dưới đây?', options: ['Ổ cắm điện', 'Dây dẫn điện', 'Phích cắm điện', 'Thiết bị đóng – cắt điện'], correct: 3 }, 
+            { type: 'mcq', id: 25, text: 'Nhiệm vụ của hệ thống điện trong gia đình:', options: ['Phân phối điện năng từ mạng điện hạ áp cho các tải tiêu thụ', 'Bảo vệ chống quá tải và đóng hoặc ngắt nguồn điện', 'Đo lượng điện tiêu thụ', 'Kết nối các thành phần, thiết bị trong lưới điện'], correct: 0 }, 
+            { type: 'mcq', id: 26, text: 'Thiết bị được sử dụng phổ biến trong mạng điện gia đình là:', options: ['Công tơ điện', 'Ampe kế', 'Đồng hồ vạn năng', 'Điện kế'], correct: 0 }, 
+            { type: 'mcq', id: 27, text: 'Chức năng của công tơ điện là:', options: ['Đóng – cắt điện bằng tay', 'Đo lường điện năng tiêu thụ của mạng điện', 'Đóng – cắt điện và tự động cắt điện để bảo vệ quá tải, ngắn mạch cho mạch điện', 'Kết nối nguồn điện với các thiết bị tiêu thụ điện'], correct: 1 }, 
+            { type: 'mcq', id: 28, text: 'Giá trị nào đúng khi nói về dòng điện định mức của cầu dao điện?', options: ['8A đến 90A.', '2A đến 40A.', '6A đến 75A.', '6A đến 60A.'], correct: 3 }, 
+            { type: 'mcq', id: 29, text: 'Biện pháp nào sau đây giúp đảm bảo an toàn điện khi lắp mô hình?', options: ['Đi chân trần khi thực hiện lắp đặt mạch điện', 'Lắp mạch điện hoàn chỉnh trước khi đấu nối mạch điện vào nguồn', 'Có thể bật nguồn điện khi vừa lắp xong mạch điện', 'Không cần kiểm tra các phần tử của mạch điện sau khi lắp xong mạch hoàn chỉnh'], correct: 1 }, 
+            { type: 'mcq', id: 30, text: 'Nội dung nào sau đây không phải là tiêu chuẩn khi kiểm tra mạch điện?', options: ['Lắp đặt đúng theo sơ đồ', 'Các mối nối đảm bảo an toàn điện, chắc, đẹp và không hở điện', 'Mạch điện đảm bảo thông mạch, không đoản mạch', 'Công tắc được lắp chính giữa bảng điện'], correct: 3 }, 
+            { type: 'mcq', id: 31, text: 'An toàn điện là:', options: ['Những quy định, quy tắc và kĩ năng cần thiết trong thiết kế và bảo dưỡng sửa chữa điện', 'Những quy định, quy tắc và kĩ năng cần thiết trong thiết kế và sử dụng điện', 'Những quy định, quy tắc và kĩ năng cần thiết trong thiết kế, sử dụng và bảo dưỡng sửa chữa điện', 'Những quy định, quy tắc và kĩ năng cần thiết trong sử dụng và bảo dưỡng sửa chữa điện'], correct: 2 }, 
+            { type: 'mcq', id: 32, text: 'Nguyên nhân chính gây mất an toàn điện là:', options: ['Chạm trực tiếp vào phần có điện của thiết bị hay đồ dùng điện mà không dùng đồ bảo hộ và dụng cụ an toàn điện', 'Sử dụng điện vào giờ cao điểm', 'Bật điện liên tục cả ngày', 'Sử dụng đồ dùng điện công suất lớn'], correct: 0 }, 
+            { type: 'mcq', id: 33, text: 'Đâu không phải là biện pháp an toàn trong thiết kế, lắp đặt hệ thống điện?', options: ['Nối đất hệ thống điện', 'Ổ cắm 3 chân có nối đất', 'Không sử dụng hệ thống chống sét cho hệ thống điện', 'Đấu nối hệ thống điện an toàn'], correct: 2 }, 
+            { type: 'mcq', id: 34, text: 'Tiết kiệm năng lượng cần thực hiện:', options: ['Từ giai đoạn thiết kế cho đến sử dụng, vận hành hệ thống và thiết bị', 'Giai đoạn thiết kế và sử dụng', 'Giai đoạn vận hành hệ thống và thiết bị', 'Giai đoạn sử dụng và vận hành'], correct: 0 }, 
+            { type: 'mcq', id: 35, text: 'Cần phải sử dụng tiết kiệm điện năng vì:', options: ['Dùng nhiều điện ở gia đình dễ gây ô nhiễm môi trường.', 'Dùng nhiều điện dễ gây tai nạn nguy hiểm tới tính mạng con người.', 'Như vậy sẽ giảm bớt chi phí cho gia đình và dành nhiều điện năng cho sản xuất.', 'Càng dùng nhiều điện thì tổn hao vô ích càng lớn và càng tốn kém cho gia đình và cho xã hội.'], correct: 3 }, 
+            { type: 'mcq', id: 36, text: 'Một điều hòa có công suất tiêu thụ là 2000 W, hệ số $\\cos\\phi = 0.8$. Dòng điện chạy qua dây dẫn của điều hòa đó có giá trị là (Giả sử $U = 220 V$):', options: ['1600 A', '12,5 A', '2500 A', '125 A'], correct: 1 }, 
+            { type: 'mcq', id: 37, text: 'Nguồn điện được nối vào cực nào của công tắc?', options: ['Cực tĩnh của công tắc', 'Cực động của công tắc', 'Cực ngoài cùng của công tắc', 'Có thể lắp vào bất kì cực nào của công tắc'], correct: 0 }, 
+
+            // PHẦN II. TRẮC NGHIỆM ĐÚNG SAI (5 câu) - Đặt sau cùng
+            {
+                type: 'tf', id: 38, text: 'Nhận định nào sau đây về cấu trúc của hệ thống điện trong gia đình là Đúng/Sai?',
+                statements: [
+                    { text: 'Tủ điện nhánh có aptomat để đóng cắt và bảo vệ toàn bộ hệ thống điện gia đình.', correct: false }, 
+                    { text: 'Tải điện nhận điện năng được cấp điện từ các tủ điện nhánh qua công tắc điện hoặc ổ cắm điện.', correct: true }, 
+                    { text: 'Tủ điện tổng có thiết bị đóng cắt và bảo vệ như cầu dao và cầu chì hoặc aptomat để đóng cắt từng nhánh hay từng tầng nhà và bảo vệ khi có sự cố.', correct: false }, 
+                    { text: 'Trong cấu trúc hệ thống điện gia đình, tủ đóng cắt và đo lường thường có công tơ điện và aptomat.', correct: true } 
+                ]
+            },
+            {
+                type: 'tf', id: 39, text: 'Nhận định nào sau đây về các biện pháp an toàn điện là Đúng/Sai?',
+                statements: [
+                    { text: 'Chạm vào dây dẫn điện bị hở cách điện.', correct: false }, 
+                    { text: 'Nối dây tiếp đất với vỏ kim loại của thiết bị hoặc sử dụng phích cắm và ổ cắm ba chấu.', correct: true }, 
+                    { text: 'Dùng găng tay cách điện khi sử dụng các công cụ điện cầm tay.', correct: true }, 
+                    { text: 'Sử dụng các thiết bị khi đang sạc điện.', correct: false } 
+                ]
+            },
+            {
+                type: 'tf', id: 40, text: 'Dựa trên sơ đồ lắp đặt hệ thống điện gia đình cơ bản (có Aptomat Tổng, Ap1, Ap2, Đ1, Đ2, CT1, CT2 và Ổ cắm), nhận định nào sau đây là Đúng/Sai?',
+                statements: [
+                    { text: 'Aptomat tổng là loại aptomat 2 cực, được đặt trước aptomat nhánh.', correct: true }, 
+                    { text: 'Hai aptomat Ap1 và Ap2 là aptomat nhánh, loại một cực, làm việc độc lập với nhau.', correct: true }, 
+                    { text: 'Hai đèn Đ1 và Đ2 được mắc nối tiếp với nhau và song song với ổ cắm điện.', correct: false }, 
+                    { text: 'Đèn Đ2 chỉ sáng khi bật cùng lúc cả công tắc CT1 và CT2.', correct: false } 
+                ]
+            },
+            {
+                type: 'tf', id: 41, text: 'Nhận định nào sau đây về quy trình thiết kế sơ đồ nguyên lí mạch điện là Đúng/Sai?',
+                statements: [
+                    { text: 'Tính toán, lựa chọn vật tư, thiết bị điện cho mạch điện.', correct: false }, 
+                    { text: 'Lựa chọn mạch điện phù hợp.', correct: true }, 
+                    { text: 'Tìm hiểu các sơ đồ nguyên lí của mạch điều khiển đèn từ hai vị trí.', correct: true }, 
+                    { text: 'Xác định vị trí nguồn lấy điện; đánh dấu vị trí lắp đặt công tắc và đèn.', correct: false } 
+                ]
+            },
+            {
+                type: 'tf', id: 42, text: 'Nhận định nào sau đây về Tiết kiệm điện năng là Đúng/Sai?',
+                statements: [
+                    { text: 'Thiết kế hệ thống truyền tải và phân phối đảm bảo thông số kĩ thuật, tránh quá tải.', correct: true }, 
+                    { text: 'Sử dụng các thiết bị và đồ dùng điện theo sở thích của cá nhân người dùng.', correct: false }, 
+                    { text: 'Lựa chọn các thiết bị và đồ dùng điện có công suất phù hợp với nhu cầu sử dụng.', correct: true }, 
+                    { text: 'Tránh tạo hệ thống thông gió và ánh sáng tự nhiên trong xây dựng.', correct: false } 
+                ]
+            }
+        ];
+
+        let shuffledQuiz = [];
+        let timerInterval;
+        let timeLeft = 45 * 60; // 45 phút
+        let startTime = 0;
+        const totalPossibleScore = 10;
+        // 37 MCQ (1 đáp án) + 5 T/F (4 nhận định = 4 đáp án) = 37 + 20 = 57 đáp án nhỏ
+        const totalOptions = 57; 
+        const pointsPerOption = totalPossibleScore / totalOptions; 
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = `Thời gian: ${formatTime(timeLeft)}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('timer').textContent = `Thời gian: Hết giờ!`;
+                    submitQuiz(true); // Tự động nộp bài khi hết giờ
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            const endTime = Date.now();
+            const timeElapsed = Math.floor((endTime - startTime) / 1000);
+            return timeElapsed;
+        }
+
+        function renderQuiz() {
+            // Tách câu hỏi thành MCQ và T/F
+            const mcqQuestions = quizData.filter(q => q.type === 'mcq');
+            const tfQuestions = quizData.filter(q => q.type === 'tf');
+
+            // Xáo trộn từng loại
+            const shuffledMCQ = shuffleArray([...mcqQuestions]);
+            const shuffledTF = shuffleArray([...tfQuestions]); 
+
+            // Kết hợp: MCQ trước, T/F sau (Đúng theo yêu cầu người dùng)
+            shuffledQuiz = [...shuffledMCQ, ...shuffledTF];
+            
+            const quizContainer = document.getElementById('quiz-container');
+            quizContainer.innerHTML = '';
+            document.getElementById('result-container').classList.add('hidden');
+            document.getElementById('submit-btn').classList.remove('hidden');
+            document.getElementById('review-btn').classList.add('hidden');
+            document.getElementById('retake-btn').classList.add('hidden');
+            document.getElementById('timer').classList.remove('text-green-600');
+            document.getElementById('timer').classList.add('bg-red-100', 'text-red-600');
+            
+            // Đặt lại thời gian
+            stopTimer(); // Đảm bảo timer cũ được dừng
+            timeLeft = 45 * 60;
+            document.getElementById('timer').textContent = `Thời gian: ${formatTime(timeLeft)}`;
+
+            shuffledQuiz.forEach((q, index) => {
+                const questionElement = document.createElement('div');
+                // Thêm tiêu đề phần cho câu T/F đầu tiên
+                if (index === shuffledMCQ.length && q.type === 'tf') {
+                    const sectionTitle = document.createElement('h2');
+                    sectionTitle.className = 'text-2xl font-bold text-blue-700 mt-8 mb-4 border-b pb-2';
+                    sectionTitle.textContent = 'PHẦN II. TRẮC NGHIỆM ĐÚNG SAI';
+                    quizContainer.appendChild(sectionTitle);
+                }
+
+                questionElement.className = 'question-card bg-gray-50 p-4 rounded-lg shadow mb-6 transition duration-300 hover:shadow-md';
+                questionElement.innerHTML = `<h3 class="text-lg font-semibold text-gray-800 mb-3">Câu ${index + 1}: ${q.text}</h3>`;
+                
+                if (q.type === 'mcq') {
+                    const optionsHtml = q.options.map((option, optIndex) => `
+                        <label class="block p-3 mb-2 cursor-pointer rounded-lg border border-gray-200 hover:bg-white transition duration-150">
+                            <input type="radio" name="q${q.id}" value="${optIndex}" class="mr-3 transform scale-110 accent-blue-500">
+                            <span class="font-medium text-gray-700">${['A', 'B', 'C', 'D'][optIndex]}. ${option}</span>
+                        </label>
+                    `).join('');
+                    questionElement.innerHTML += `<div class="options space-y-1">${optionsHtml}</div>`;
+                } else if (q.type === 'tf') {
+                    // Hiển thị phần chú thích (nhận định) rõ ràng hơn
+                    questionElement.innerHTML += `<p class="text-sm italic text-gray-600 mb-4">Chọn 'Đúng' hoặc 'Sai' cho mỗi nhận định dưới đây:</p>`;
+                    const statementsHtml = q.statements.map((stmt, stmtIndex) => `
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 mb-2 rounded-lg border border-gray-200 bg-white">
+                            <p class="w-full sm:w-2/3 text-gray-700 mb-2 sm:mb-0">${stmtIndex + 1}. ${stmt.text}</p>
+                            <div class="flex space-x-6">
+                                <label class="cursor-pointer flex items-center">
+                                    <input type="radio" name="q${q.id}_s${stmtIndex}" value="true" class="mr-1 transform scale-110 accent-green-500"> Đúng
+                                </label>
+                                <label class="cursor-pointer flex items-center">
+                                    <input type="radio" name="q${q.id}_s${stmtIndex}" value="false" class="mr-1 transform scale-110 accent-red-500"> Sai
+                                </label>
+                            </div>
+                        </div>
+                    `).join('');
+                    questionElement.innerHTML += `<div class="options space-y-1">${statementsHtml}</div>`;
+                }
+                quizContainer.appendChild(questionElement);
+            });
+            startTimer();
+        }
+
+        function submitQuiz(isTimeOut = false) {
+            const timeElapsedSeconds = stopTimer();
+            if (isTimeOut) {
+                // Sử dụng modal box thay vì alert()
+                showModal("Hết giờ!", "Bài kiểm tra của bạn đã được tự động nộp.");
+            } else {
+                const unansweredCount = checkUnanswered();
+                if (unansweredCount > 0) {
+                    showConfirmModal(`Bạn còn ${unansweredCount} câu/nhận định chưa trả lời. Bạn có chắc muốn nộp bài?`, () => {
+                        processSubmission(timeElapsedSeconds);
+                    }, () => {
+                        startTimer(); // Tiếp tục làm bài
+                    });
+                    return; // Chờ modal trả lời
+                }
+            }
+            
+            processSubmission(timeElapsedSeconds);
+        }
+        
+        function processSubmission(timeElapsedSeconds) {
+            let score = 0;
+            const quizContainer = document.getElementById('quiz-container');
+            const questions = quizContainer.querySelectorAll('.question-card');
+            
+            questions.forEach(qElement => {
+                // Lấy ID câu hỏi gốc (đã được map lại)
+                const headerText = qElement.querySelector('h3').textContent;
+                const match = headerText.match(/Câu \d+: (.*)/);
+                if (!match) return;
+                
+                // Tìm câu hỏi trong shuffledQuiz
+                const qText = match[1].trim();
+                const questionData = shuffledQuiz.find(q => q.text === qText);
+                
+                if (!questionData) return;
+
+                if (questionData.type === 'mcq') {
+                    const selected = qElement.querySelector(`input[name="q${questionData.id}"]:checked`);
+                    
+                    if (selected && parseInt(selected.value) === questionData.correct) {
+                        score += pointsPerOption;
+                    }
+
+                } else if (questionData.type === 'tf') {
+                    questionData.statements.forEach((stmt, stmtIndex) => {
+                        const inputName = `q${questionData.id}_s${stmtIndex}`;
+                        const selected = qElement.querySelector(`input[name="${inputName}"]:checked`);
+                        const isCorrectValue = stmt.correct ? 'true' : 'false';
+
+                        if (selected && selected.value === isCorrectValue) {
+                            score += pointsPerOption;
+                        }
+                    });
+                }
+            });
+
+            // Hiển thị kết quả
+            document.getElementById('score').textContent = score.toFixed(2);
+            document.getElementById('time-taken').textContent = formatTime(timeElapsedSeconds);
+            document.getElementById('result-container').classList.remove('hidden');
+            
+            // Ẩn nút nộp bài, hiện nút xem lại và làm lại
+            document.getElementById('submit-btn').classList.add('hidden');
+            document.getElementById('review-btn').classList.remove('hidden');
+            document.getElementById('retake-btn').classList.remove('hidden');
+
+            // Khóa các ô chọn
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => input.disabled = true);
+            
+            // Cập nhật timer
+            document.getElementById('timer').textContent = `Hoàn thành trong: ${formatTime(timeElapsedSeconds)}`;
+            document.getElementById('timer').classList.remove('bg-red-100', 'text-red-600');
+            document.getElementById('timer').classList.add('bg-green-100', 'text-green-600');
+            
+            // Tự động xem lại bài sau khi nộp
+            reviewQuiz();
+        }
+        
+        function checkUnanswered() {
+            let unansweredCount = 0;
+            shuffledQuiz.forEach(q => {
+                if (q.type === 'mcq') {
+                    if (!document.querySelector(`input[name="q${q.id}"]:checked`)) {
+                        unansweredCount++;
+                    }
+                } else if (q.type === 'tf') {
+                    q.statements.forEach((stmt, stmtIndex) => {
+                        const inputName = `q${q.id}_s${stmtIndex}`;
+                        if (!document.querySelector(`input[name="${inputName}"]:checked`)) {
+                            unansweredCount++;
+                        }
+                    });
+                }
+            });
+            // Trả về số lượng câu/nhận định chưa trả lời
+            return unansweredCount;
+        }
+
+        function reviewQuiz() {
+            const quizContainer = document.getElementById('quiz-container');
+            const questions = quizContainer.querySelectorAll('.question-card');
+
+            questions.forEach(qElement => {
+                qElement.classList.remove('bg-gray-50');
+                qElement.classList.add('bg-white'); 
+                
+                const headerText = qElement.querySelector('h3').textContent;
+                const qText = headerText.match(/Câu \d+: (.*)/)[1].trim();
+                const questionData = shuffledQuiz.find(q => q.text === qText);
+                
+                if (!questionData) return;
+                
+                if (questionData.type === 'mcq') {
+                    const options = qElement.querySelectorAll('.options label');
+                    options.forEach((label, optIndex) => {
+                        const input = label.querySelector('input');
+                        const isCorrect = optIndex === questionData.correct;
+                        const isSelected = input.checked;
+
+                        label.classList.remove('hover:bg-white');
+                        label.classList.add('border-l-4'); // Dùng border-left để phân biệt
+
+                        if (isCorrect) {
+                            label.classList.add('correct-answer', 'border-green-500');
+                            label.innerHTML += ' <span class="text-sm font-bold text-green-700">(ĐÁP ÁN CHUẨN)</span>';
+                        }
+                        
+                        if (isSelected && !isCorrect) {
+                            label.classList.add('incorrect-answer', 'border-red-500');
+                            label.innerHTML += ' <span class="text-sm font-bold text-red-700">(BẠN CHỌN SAI)</span>';
+                        } else if (isSelected && isCorrect) {
+                            label.classList.add('user-selected', 'border-blue-500');
+                        } else {
+                            label.classList.add('border-gray-200');
+                        }
+                    });
+                } else if (questionData.type === 'tf') {
+                    const statements = qElement.querySelectorAll('.options > div');
+                    questionData.statements.forEach((stmt, stmtIndex) => {
+                        const stmtElement = statements[stmtIndex];
+                        const inputName = `q${questionData.id}_s${stmtIndex}`;
+                        const isCorrectValue = stmt.correct ? 'true' : 'false';
+                        
+                        // Đánh dấu đáp án chuẩn
+                        const correctInput = stmtElement.querySelector(`input[value="${isCorrectValue}"]`);
+                        if (correctInput) {
+                            correctInput.parentNode.classList.add('tf-correct');
+                            correctInput.parentNode.innerHTML += ' <span class="text-xs">(CHUẨN)</span>';
+                        }
+
+                        // Đánh dấu lựa chọn của người dùng
+                        const userSelectedInput = stmtElement.querySelector(`input[name="${inputName}"]:checked`);
+                        
+                        if (userSelectedInput) {
+                            userSelectedInput.parentNode.classList.add('bg-blue-100', 'rounded-md', 'px-2', 'py-1');
+                            if (userSelectedInput.value !== isCorrectValue) {
+                                // Sai: highlight lựa chọn sai của người dùng
+                                userSelectedInput.parentNode.classList.remove('bg-blue-100');
+                                userSelectedInput.parentNode.classList.add('tf-incorrect-user-choice');
+                                userSelectedInput.parentNode.innerHTML += ' <span class="text-xs">(SAI)</span>';
+                            }
+                        }
+                    });
+                }
+            });
+            // Cuộn lên đầu
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function retakeQuiz() {
+            showConfirmModal("Bạn có chắc chắn muốn làm lại bài kiểm tra? Kết quả hiện tại sẽ bị xóa.", () => {
+                renderQuiz();
+            });
+        }
+        
+        // --- Modal Functions (to replace alert/confirm) ---
+
+        function showModal(title, message) {
+            let modal = document.getElementById('custom-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'custom-modal';
+                modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 transition-opacity duration-300 hidden';
+                modal.innerHTML = `
+                    <div class="bg-white rounded-lg shadow-xl p-6 w-11/12 md:w-1/3 transform scale-95 transition-transform duration-300">
+                        <h3 id="modal-title" class="text-xl font-bold text-blue-700 mb-4 border-b pb-2"></h3>
+                        <p id="modal-message" class="text-gray-700 mb-6"></p>
+                        <div class="flex justify-end">
+                            <button onclick="closeModal()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-150">Đóng</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            modal.classList.remove('hidden');
+        }
+        
+        function showConfirmModal(message, onConfirm, onCancel = null) {
+            let modal = document.getElementById('custom-confirm-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'custom-confirm-modal';
+                modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 transition-opacity duration-300 hidden';
+                document.body.appendChild(modal);
+            }
+            
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg shadow-xl p-6 w-11/12 md:w-1/3 transform scale-95 transition-transform duration-300">
+                    <h3 class="text-xl font-bold text-red-600 mb-4 border-b pb-2">Xác nhận</h3>
+                    <p class="text-gray-700 mb-6">${message}</p>
+                    <div class="flex justify-end space-x-4">
+                        <button id="cancel-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-150">Hủy</button>
+                        <button id="confirm-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition duration-150">Xác nhận</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('confirm-btn').onclick = () => {
+                closeModal('custom-confirm-modal');
+                onConfirm();
+            };
+            document.getElementById('cancel-btn').onclick = () => {
+                closeModal('custom-confirm-modal');
+                if (onCancel) onCancel();
+            };
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal(id = 'custom-modal') {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // Khởi tạo quiz khi trang tải xong
+        document.addEventListener('DOMContentLoaded', renderQuiz);
+    </script>
+
+</body>
+</html>
